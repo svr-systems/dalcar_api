@@ -41,7 +41,7 @@ class CompanyContrller extends Controller {
         return $this->apiRsp(422, 'ID no existente');
       }
 
-      $item->active = false;
+      $item->is_active = false;
       $item->updated_by_id = $req->user()->id;
       $item->save();
 

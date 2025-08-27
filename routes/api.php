@@ -26,21 +26,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     //Catalogs
     Route::get('roles', [RoleController::class, 'index']);
 
-    //User Assistance File
-    Route::post('users/assistance/file/records', [UserAssistanceFileController::class, 'showAssistanceFileRegisters']);
-    Route::apiResource('users/assistance/file', UserAssistanceFileController::class);
-
-    //Schedules
-    Route::apiResource('schedule', ScheduleController::class);
-
-    //User Assistance
-    Route::apiResource('users/assistance', UserAssistanceController::class);
-
     //Users
     Route::get('users/file/json', [UserController::class, 'getUserFile']);
     Route::post('users/dni', [UserController::class, 'getDni']);
     Route::apiResource('users', UserController::class);
 
-    Route::apiResource('company/branch', BranchContrller::class);
-    Route::apiResource('company', CompanyContrller::class);
+    Route::apiResource('companies/branches', BranchContrller::class);
+    Route::apiResource('companies', CompanyContrller::class);
 });
