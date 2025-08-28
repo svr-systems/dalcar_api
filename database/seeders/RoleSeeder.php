@@ -9,6 +9,7 @@ class RoleSeeder extends Seeder {
   public function run() {
     $items = [
       [
+        'id' => 1,
         'name' => 'Admin',
       ],
     ];

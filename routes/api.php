@@ -1,14 +1,21 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\BranchContrller;
 use App\Http\Controllers\CompanyContrller;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\InvestorTypeController;
+use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\StateController;
 use App\Http\Controllers\UserAssistanceController;
 use App\Http\Controllers\UserAssistanceFileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VatTypeController;
+use App\Http\Controllers\VehicleTransmissionController;
+use App\Http\Controllers\VendorTypeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +32,13 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     //Catalogs
     Route::get('roles', [RoleController::class, 'index']);
+    Route::get('states', [StateController::class, 'index']);
+    Route::get('municipalities', [MunicipalityController::class, 'index']);
+    Route::get('investor_types', [InvestorTypeController::class, 'index']);
+    Route::get('vendor_types', [VendorTypeController::class, 'index']);
+    Route::get('banks', [BankController::class, 'index']);
+    Route::get('vehicle_transmissions', [VehicleTransmissionController::class, 'index']);
+    Route::get('vat_types', [VatTypeController::class, 'index']);
 
     //Users
     Route::get('users/file/json', [UserController::class, 'getUserFile']);
