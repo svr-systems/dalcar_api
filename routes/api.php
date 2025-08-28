@@ -6,7 +6,9 @@ use App\Http\Controllers\BranchContrller;
 use App\Http\Controllers\CompanyContrller;
 use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvestorTypeController;
+use App\Http\Controllers\LegacyVehicleController;
 use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ScheduleController;
@@ -19,6 +21,7 @@ use App\Http\Controllers\VehicleBrandController;
 use App\Http\Controllers\VehicleColorController;
 use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\VehicleTransmissionController;
+use App\Http\Controllers\VendorCotroller;
 use App\Http\Controllers\VendorTypeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -60,4 +63,13 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     //Companies
     Route::apiResource('companies', CompanyContrller::class);
+
+    //Investors
+    Route::apiResource('investors', InvestorController::class);
+
+    //Vendors
+    Route::apiResource('vendors', VendorCotroller::class);
+
+    //Legacy vehicles
+    Route::apiResource('legacy_vehicles', LegacyVehicleController::class);
 });

@@ -76,8 +76,8 @@ class GenController extends Controller {
   public static function getFullName($data) {
     return trim(
       $data->name . ' ' .
-      $data->surname_p . ' ' .
-      trim($data->surname_m) . ' '
+      $data->paternal_surname . ' ' .
+      trim($data->maternal_surname) . ' '
     );
   }
 
