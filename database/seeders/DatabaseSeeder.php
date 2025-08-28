@@ -22,5 +22,9 @@ class DatabaseSeeder extends Seeder
         // $this->call(BanksSeeder::class);
         // $this->call(VehicleTransmissionsSeeder::class);
         // $this->call(VatTypesSeeder::class);
+        $this->call(VehicleBrandsSeeder::class);
+        $this->call(VehicleModelsSeeder::class);
+        $this->call(VehicleColorsSeeder::class);
+        $this->call(ExpenseTypesSeeder::class);
     }
 }

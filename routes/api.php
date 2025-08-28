@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BranchContrller;
 use App\Http\Controllers\CompanyContrller;
+use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\InvestorTypeController;
 use App\Http\Controllers\MunicipalityController;
@@ -14,6 +15,9 @@ use App\Http\Controllers\UserAssistanceController;
 use App\Http\Controllers\UserAssistanceFileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VatTypeController;
+use App\Http\Controllers\VehicleBrandController;
+use App\Http\Controllers\VehicleColorController;
+use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\VehicleTransmissionController;
 use App\Http\Controllers\VendorTypeController;
 use Illuminate\Http\Request;
@@ -39,12 +43,21 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('banks', [BankController::class, 'index']);
     Route::get('vehicle_transmissions', [VehicleTransmissionController::class, 'index']);
     Route::get('vat_types', [VatTypeController::class, 'index']);
+    
+    //Catalogs CRUD
+    Route::apiResource('vehicle_brands', VehicleBrandController::class);
+    Route::apiResource('vehicle_models', VehicleModelController::class);
+    Route::apiResource('vehicle_colors', VehicleColorController::class);
+    Route::apiResource('expense_types', ExpenseTypeController::class);
 
     //Users
     Route::get('users/file/json', [UserController::class, 'getUserFile']);
     Route::post('users/dni', [UserController::class, 'getDni']);
     Route::apiResource('users', UserController::class);
 
+    //Branches
     Route::apiResource('companies/branches', BranchContrller::class);
+
+    //Companies
     Route::apiResource('companies', CompanyContrller::class);
 });
