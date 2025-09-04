@@ -77,6 +77,12 @@ class LegacyVehicleController extends Controller {
         return $this->apiRsp(422, $valid->errors()->first());
       }
 
+      $valid_values = $this->validValues($req);
+
+      if(!$valid_values['response']){
+        return $this->apiRsp(500, $valid_values['message'],null);
+      }
+
       $store_mode = is_null($id);
 
       if ($store_mode) {
@@ -153,5 +159,28 @@ class LegacyVehicleController extends Controller {
     }
 
     return $item;
+  }
+
+  public static function validValues($req){
+    $purchase_price = GenController::filter($req->purchase_price, 'f');
+    $commission_amount = GenController::filter($req->commission_amount, 'f');
+
+    if($purchase_price < $commission_amount){
+      return ['response' => false, 'message' => 'La comisión no puede superar al preció de compra.'];
+    }
+
+    $vehicle_investor_percentages = 0;
+
+    if ($req->legacy_vehicle_investors) {
+      foreach ($req->legacy_vehicle_investors as $legacy_vehicle_investor) {
+        $vehicle_investor_percentages += GenController::filter($legacy_vehicle_investor['percentages'], 'f');
+      }
+    }
+
+    if($vehicle_investor_percentages !== floatval(100)){
+      return ['response' => false, 'message' => 'La suma de los porcentajes debe ser del 100%.'];
+    }
+
+    return ['response' => true];
   }
 }

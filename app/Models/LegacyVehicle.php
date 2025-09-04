@@ -49,7 +49,8 @@ class LegacyVehicle extends Model
 
     static public function getItems($req) {
         $items = LegacyVehicle::
-            where('is_active', boolval($req->is_active));
+            where('is_active', boolval($req->is_active))->
+            orderBy('purchase_date','DESC');
 
         if ($req->user()->id !== 1) {
             $items = $items->
