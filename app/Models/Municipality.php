@@ -12,6 +12,7 @@ class Municipality extends Model
 
   static public function getItems($req) {
     $items = Municipality::
+      orderBy('name')->
       where('is_active', true)->
       where('state_id', $req->state_id)->
       get();

@@ -12,7 +12,8 @@ class Bank extends Model
 
   static public function getItems($req) {
     $items = Bank::
-    where('is_active', true);
+      orderBy('name')->
+      where('is_active', true);
 
     $items = $items->get([
       'id',

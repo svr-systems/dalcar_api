@@ -12,7 +12,8 @@ class InvestorType extends Model
 
   static public function getItems($req) {
     $items = InvestorType::
-    where('is_active', true);
+      orderBy('name')->
+      where('is_active', true);
 
     $items = $items->get([
       'id',

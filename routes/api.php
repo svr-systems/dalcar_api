@@ -4,11 +4,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BranchContrller;
 use App\Http\Controllers\CompanyContrller;
+use App\Http\Controllers\CustomOfficeController;
 use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvestorTypeController;
 use App\Http\Controllers\LegacyVehicleController;
 use App\Http\Controllers\MunicipalityController;
+use App\Http\Controllers\OriginTypeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StateController;
 use App\Http\Controllers\UserController;
@@ -17,6 +19,7 @@ use App\Http\Controllers\VehicleBrandController;
 use App\Http\Controllers\VehicleColorController;
 use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\VehicleTransmissionController;
+use App\Http\Controllers\VehicleVersionController;
 use App\Http\Controllers\VendorCotroller;
 use App\Http\Controllers\VendorTypeController;
 use Illuminate\Http\Request;
@@ -42,10 +45,13 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('banks', [BankController::class, 'index']);
     Route::get('vehicle_transmissions', [VehicleTransmissionController::class, 'index']);
     Route::get('vat_types', [VatTypeController::class, 'index']);
+    Route::get('origin_types', [OriginTypeController::class, 'index']);
+    Route::get('customs_offices', [CustomOfficeController::class, 'index']);
     
     //Catalogs CRUD
     Route::apiResource('vehicle_brands', VehicleBrandController::class);
     Route::apiResource('vehicle_models', VehicleModelController::class);
+    Route::apiResource('vehicle_versions', VehicleVersionController::class);
     Route::apiResource('vehicle_colors', VehicleColorController::class);
     Route::apiResource('expense_types', ExpenseTypeController::class);
 

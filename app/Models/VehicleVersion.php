@@ -6,13 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Validator;
 
-class VehicleColor extends Model {
+class VehicleVersion extends Model {
   use HasFactory;
   public $timestamps = false;
 
   public static function valid($data, $is_req = true) {
     $rules = [
       'name' => 'required|min:2|max:60',
+      'vehicle_model_id' => 'required|numeric',
+      'model_year' => 'required|numeric',
     ];
 
     if (!$is_req) {
@@ -25,15 +27,17 @@ class VehicleColor extends Model {
   }
 
   static public function getItems($req) {
-    $items = VehicleColor::
+    $items = VehicleVersion::
       orderBy('name')->
+      where('vehicle_model_id', $req->vehicle_model_id)->
       where('is_active', boolval($req->is_active));
 
     $items = $items->
-    get([
+      get([
         'id',
         'is_active',
         'name',
+        'model_year',
       ]);
 
     foreach ($items as $key => $item) {
@@ -44,11 +48,12 @@ class VehicleColor extends Model {
   }
 
   static public function getItem($req, $id) {
-    $item = VehicleColor::
-    find($id, [
+    $item = VehicleVersion::
+      find($id, [
         'id',
         'is_active',
         'name',
+        'model_year',
       ]);
 
     return $item;

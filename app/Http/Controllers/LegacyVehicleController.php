@@ -117,14 +117,23 @@ class LegacyVehicleController extends Controller {
     $item->vendor_id = GenController::filter($data->vendor_id, 'id');
     $item->purchase_date = GenController::filter($data->purchase_date, 'd');
     $item->vehicle_model_id = GenController::filter($data->vehicle_model_id, 'id');
-    $item->model_year = GenController::filter($data->model_year, 'i');
+    $item->vehicle_version_id = GenController::filter($data->vehicle_version_id, 'id');
     $item->vehicle_transmission_id = GenController::filter($data->vehicle_transmission_id, 'id');
     $item->vehicle_color_id = GenController::filter($data->vehicle_color_id, 'id');
     $item->vin = GenController::filter($data->vin, 'U');
+    $item->engine_number = GenController::filter($data->engine_number, 'U');
+    $item->repuve = GenController::filter($data->repuve, 'U');
+    $item->vehicle_key = GenController::filter($data->vehicle_key, 'U');
     $item->purchase_price = GenController::filter($data->purchase_price, 'f');
     $item->commission_amount = GenController::filter($data->commission_amount, 'f');
     $item->vat_type_id = GenController::filter($data->vat_type_id, 'id');
     $item->invoice_amount = GenController::filter($data->invoice_amount, 'f');
+    $item->notes = GenController::filter($data->notes, 'U');
+    $item->origin_type_id = GenController::filter($data->origin_type_id, 'id');
+    $item->pediment_number = GenController::filter($data->pediment_number, 'i');
+    $item->pediment_date = GenController::filter($data->pediment_date, 'd');
+    $item->custom_office_id = GenController::filter($data->custom_office_id, 'id');
+    $item->pediment_notes = GenController::filter($data->pediment_notes, 'U');
     $item->save();
 
     if ($data->legacy_vehicle_investors) {

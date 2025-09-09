@@ -6,51 +6,51 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Validator;
 
-class VehicleBrand extends Model
-{
+class VehicleBrand extends Model {
   use HasFactory;
   public $timestamps = false;
 
-    public static function valid($data, $is_req = true) {
-        $rules = [
-            'name' => 'required|min:2|max:60',
-        ];
+  public static function valid($data, $is_req = true) {
+    $rules = [
+      'name' => 'required|min:2|max:60',
+    ];
 
-        if (!$is_req) {
-            array_push($rules, ['is_active' => 'required|in:true,false,1,0']);
-        }
-
-        $msgs = [];
-
-        return Validator::make($data, $rules, $msgs);
+    if (!$is_req) {
+      array_push($rules, ['is_active' => 'required|in:true,false,1,0']);
     }
 
-    static public function getItems($req) {
-        $items = VehicleBrand::
-            where('is_active', boolval($req->is_active));
+    $msgs = [];
 
-        $items = $items->
-            get([
-                'id',
-                'is_active',
-                'name',
-            ]);
+    return Validator::make($data, $rules, $msgs);
+  }
 
-        foreach ($items as $key => $item) {
-            $item->key = $key;
-        }
+  static public function getItems($req) {
+    $items = VehicleBrand::
+      orderBy('name')->
+      where('is_active', boolval($req->is_active));
 
-        return $items;
+    $items = $items->
+    get([
+        'id',
+        'is_active',
+        'name',
+      ]);
+
+    foreach ($items as $key => $item) {
+      $item->key = $key;
     }
 
-    static public function getItem($req, $id) {
-        $item = VehicleBrand::
-            find($id, [
-                'id',
-                'is_active',
-                'name',
-            ]);
+    return $items;
+  }
 
-        return $item;
-    }
+  static public function getItem($req, $id) {
+    $item = VehicleBrand::
+    find($id, [
+        'id',
+        'is_active',
+        'name',
+      ]);
+
+    return $item;
+  }
 }

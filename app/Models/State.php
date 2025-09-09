@@ -12,6 +12,7 @@ class State extends Model
 
   static public function getItems($req) {
     $items = State::
+      orderBy('name')->
       where('is_active', true)->
       get();
 

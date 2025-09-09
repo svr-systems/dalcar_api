@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class VatType extends Model {
+class CustomOffice extends Model {
   use HasFactory;
   public $timestamps = false;
 
   static public function getItems($req) {
-    $items = VatType::
+    $items = CustomOffice::
       orderBy('name')->
       where('is_active', true);
 
