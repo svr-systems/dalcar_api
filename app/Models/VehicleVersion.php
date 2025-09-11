@@ -30,6 +30,7 @@ class VehicleVersion extends Model {
     $items = VehicleVersion::
       orderBy('name')->
       where('vehicle_model_id', $req->vehicle_model_id)->
+      where('model_year', $req->model_year)->
       where('is_active', boolval($req->is_active));
 
     $items = $items->
