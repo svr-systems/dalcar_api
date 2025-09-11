@@ -19,7 +19,7 @@ return new class extends Migration {
       $table->foreignId('origin_type_id')->after('notes')->constrained('origin_types');
       $table->string('pediment_number', 30)->after('origin_type_id')->nullable();
       $table->date('pediment_date')->after('pediment_number')->nullable();
-      $table->foreignId('custom_office_id')->after('pediment_date')->constrained('custom_offices');
+      $table->foreignId('custom_office_id')->after('pediment_date')->nullable()->constrained('custom_offices');
       $table->string('pediment_notes')->after('custom_office_id')->nullable();
     });
   }
