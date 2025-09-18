@@ -9,8 +9,10 @@ use DB;
 use Illuminate\Http\Request;
 use Throwable;
 
-class LegacyVehicleController extends Controller {
-  public function index(Request $req) {
+class LegacyVehicleController extends Controller
+{
+  public function index(Request $req)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -22,7 +24,8 @@ class LegacyVehicleController extends Controller {
     }
   }
 
-  public function show(Request $req, $id) {
+  public function show(Request $req, $id)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -34,7 +37,8 @@ class LegacyVehicleController extends Controller {
     }
   }
 
-  public function destroy(Request $req, $id) {
+  public function destroy(Request $req, $id)
+  {
     DB::beginTransaction();
     try {
       $item = LegacyVehicle::find($id);
@@ -56,18 +60,20 @@ class LegacyVehicleController extends Controller {
       DB::rollback();
       return $this->apiRsp(500, null, $err);
     }
-
   }
 
-  public function store(Request $req) {
+  public function store(Request $req)
+  {
     return $this->storeUpdate($req, null);
   }
 
-  public function update(Request $req, $id) {
+  public function update(Request $req, $id)
+  {
     return $this->storeUpdate($req, $id);
   }
 
-  public function storeUpdate($req, $id) {
+  public function storeUpdate($req, $id)
+  {
     DB::beginTransaction();
     try {
 
@@ -79,8 +85,8 @@ class LegacyVehicleController extends Controller {
 
       $valid_values = $this->validValues($req);
 
-      if(!$valid_values['response']){
-        return $this->apiRsp(500, $valid_values['message'],null);
+      if (!$valid_values['response']) {
+        return $this->apiRsp(500, $valid_values['message'], null);
       }
 
       $store_mode = is_null($id);
@@ -108,15 +114,15 @@ class LegacyVehicleController extends Controller {
     }
   }
 
-  public static function saveItem($item, $data, $is_req = true) {
+  public static function saveItem($item, $data, $is_req = true)
+  {
     if (!$is_req) {
       $item->active = GenController::filter($data->active, 'b');
     }
 
     $item->branch_id = GenController::filter($data->branch_id, 'id');
-    $item->vendor_id = GenController::filter($data->vendor_id, 'id');
     $item->purchase_date = GenController::filter($data->purchase_date, 'd');
-    $item->vehicle_model_id = GenController::filter($data->vehicle_model_id, 'id');
+    $item->vendor_id = GenController::filter($data->vendor_id, 'id');
     $item->vehicle_version_id = GenController::filter($data->vehicle_version_id, 'id');
     $item->vehicle_transmission_id = GenController::filter($data->vehicle_transmission_id, 'id');
     $item->vehicle_color_id = GenController::filter($data->vehicle_color_id, 'id');
@@ -142,10 +148,11 @@ class LegacyVehicleController extends Controller {
         if (!$legacy_vehicle_investor_item) {
           $legacy_vehicle_investor_item = new LegacyVehicleInvestor;
         }
+
         $legacy_vehicle_investor_item->is_active = GenController::filter($legacy_vehicle_investor['is_active'], 'b');
         $legacy_vehicle_investor_item->investor_id = GenController::filter($legacy_vehicle_investor['investor_id'], 'id');
         $legacy_vehicle_investor_item->percentages = GenController::filter($legacy_vehicle_investor['percentages'], 'f');
-        $legacy_vehicle_investor_item->amount = GenController::filter($legacy_vehicle_investor['amount'], 'f');
+        $legacy_vehicle_investor_item->amount = GenController::filter($legacy_vehicle_investor['amount'], 'f'); //CALCULAR
         $legacy_vehicle_investor_item->legacy_vehicle_id = $item->id;
         $legacy_vehicle_investor_item->save();
       }
@@ -157,6 +164,7 @@ class LegacyVehicleController extends Controller {
         if (!$legacy_vehicle_expense_item) {
           $legacy_vehicle_expense_item = new LegacyVehicleExpense;
         }
+
         $legacy_vehicle_expense_item->is_active = GenController::filter($legacy_vehicle_expense['is_active'], 'b');
         $legacy_vehicle_expense_item->expense_type_id = GenController::filter($legacy_vehicle_expense['expense_type_id'], 'id');
         $legacy_vehicle_expense_item->note = GenController::filter($legacy_vehicle_expense['note'], 'U');
@@ -170,11 +178,12 @@ class LegacyVehicleController extends Controller {
     return $item;
   }
 
-  public static function validValues($req){
+  public static function validValues($req)
+  {
     $purchase_price = GenController::filter($req->purchase_price, 'f');
     $commission_amount = GenController::filter($req->commission_amount, 'f');
 
-    if($purchase_price < $commission_amount){
+    if ($purchase_price < $commission_amount) {
       return ['response' => false, 'message' => 'La comisión no puede superar al preció de compra.'];
     }
 
@@ -186,7 +195,7 @@ class LegacyVehicleController extends Controller {
       }
     }
 
-    if($vehicle_investor_percentages !== floatval(100)){
+    if ($vehicle_investor_percentages !== floatval(100)) {
       return ['response' => false, 'message' => 'La suma de los porcentajes debe ser del 100%.'];
     }
 

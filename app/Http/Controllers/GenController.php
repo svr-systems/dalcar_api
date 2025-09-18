@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-class GenController extends Controller {
-  public static function filter($val, $type) {
+class GenController extends Controller
+{
+  public static function filter($val, $type)
+  {
     $v = trim($val);
 
     switch ($type) {
@@ -52,7 +54,8 @@ class GenController extends Controller {
     return $v;
   }
 
-  public static function empty($v) {
+  public static function empty($v)
+  {
     if (empty($v) || mb_strtolower($v, 'UTF-8') == 'null') {
       return true;
     }
@@ -60,12 +63,14 @@ class GenController extends Controller {
     return false;
   }
 
-  public static function trim($v) {
+  public static function trim($v)
+  {
     $v = trim($v);
     return empty($v) ? null : $v;
   }
 
-  public static function valInInterval($val_1, $val_2, $interval) {
+  public static function valInInterval($val_1, $val_2, $interval)
+  {
     $val_1 = (float) $val_1;
     $val_2 = (float) $val_2;
     $interval = (float) $interval;
@@ -73,19 +78,22 @@ class GenController extends Controller {
     return $val_1 >= ($val_2 - $interval) && $val_1 <= ($val_2 + $interval);
   }
 
-  public static function getFullName($data) {
+  public static function getFullName($data)
+  {
     return trim(
       $data->name . ' ' .
-      $data->paternal_surname . ' ' .
-      trim($data->maternal_surname) . ' '
+        $data->paternal_surname . ' ' .
+        trim($data->maternal_surname) . ' '
     );
   }
 
-  public static function isAppDebug() {
+  public static function isAppDebug()
+  {
     return GenController::filter(env('APP_DEBUG'), 'b');
   }
 
-  public static function deleteKeyFromArray($array) {
+  public static function deleteKeyFromArray($array)
+  {
     $new_array = [];
     foreach ($array as $item) {
       array_push($new_array, $item);

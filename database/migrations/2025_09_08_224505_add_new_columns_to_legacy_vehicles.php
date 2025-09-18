@@ -8,9 +8,9 @@ return new class extends Migration {
   /**
    * Run the migrations.
    */
-  public function up(): void {
+  public function up(): void
+  {
     Schema::table('legacy_vehicles', function (Blueprint $table) {
-      $table->dropColumn('model_year');
       $table->foreignId('vehicle_version_id')->after('vehicle_model_id')->constrained('vehicle_versions');
       $table->string('engine_number', 30)->after('vin')->nullable();
       $table->string('repuve', 25)->after('engine_number')->nullable();
@@ -27,9 +27,9 @@ return new class extends Migration {
   /**
    * Reverse the migrations.
    */
-  public function down(): void {
+  public function down(): void
+  {
     Schema::table('legacy_vehicles', function (Blueprint $table) {
-      $table->smallInteger('model_year');
       $table->dropConstrainedForeignId('vehicle_version_id');
       $table->dropColumn('engine_number');
       $table->dropColumn('repuve');
