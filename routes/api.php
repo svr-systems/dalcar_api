@@ -49,7 +49,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('vat_types', [VatTypeController::class, 'index']);
     Route::get('origin_types', [OriginTypeController::class, 'index']);
     Route::get('customs_offices', [CustomOfficeController::class, 'index']);
-    
+
     //Catalogs CRUD
     Route::apiResource('vehicle_brands', VehicleBrandController::class);
     Route::apiResource('vehicle_models', VehicleModelController::class);
@@ -76,8 +76,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('vendors', VendorCotroller::class);
 
     //Legacy vehicle documents
-    Route::apiResource('legacy_vehicles/documents', LegacyVehicleDocumentController::class);
-    
+    Route::apiResource('legacy_vehicle_documents', LegacyVehicleDocumentController::class);
+
     //Legacy vehicles
     Route::apiResource('legacy_vehicles', LegacyVehicleController::class);
 });

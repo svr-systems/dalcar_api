@@ -118,7 +118,6 @@ class LegacyVehicleDocumentController extends Controller {
       $data->document_dlt,
       'LegacyVehicleDocument'
     );
-    $item->document_path = "not document";
     $item->save();
 
     return $item;

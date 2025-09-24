@@ -167,6 +167,29 @@ class LegacyVehicle extends Model
             $legacy_vehicle_expense->expense_type = ExpenseType::find($legacy_vehicle_expense->expense_type_id, ['name']);
         }
 
+        $item->legacy_vehicle_document_bills = LegacyVehicleDocument::query()
+            ->where('legacy_vehicle_id', $item->id)
+            ->where('is_active', 1)
+            ->where('document_type_id', 1)
+            ->get([
+                'id',
+                'is_active',
+                'legacy_vehicle_id',
+                'document_type_id',
+                'is_scheduled',
+                'scheduled_at',
+                'received_at',
+                'document_path',
+                'note',
+            ]);
+
+        foreach ($item->legacy_vehicle_document_bills as $legacy_vehicle_document_bill) {
+            $legacy_vehicle_document_bill->document_type = DocumentType::find($legacy_vehicle_document_bill->document_type_id, ['name']);
+            $legacy_vehicle_document_bill->document_b64 = DocMgrController::getB64($legacy_vehicle_document_bill->document_path, 'LegacyVehicleDocument');
+            $legacy_vehicle_document_bill->document_doc = null;
+            $legacy_vehicle_document_bill->document_dlt = false;
+        }
+
         return $item;
     }
 }
