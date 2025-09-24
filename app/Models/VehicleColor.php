@@ -27,6 +27,7 @@ class VehicleColor extends Model {
   static public function getItems($req) {
     $items = VehicleColor::
       orderBy('name')->
+      where('vehicle_brand_id',$req->vehicle_brand_id)->
       where('is_active', boolval($req->is_active));
 
     $items = $items->
@@ -49,6 +50,7 @@ class VehicleColor extends Model {
         'id',
         'is_active',
         'name',
+        'vehicle_brand_id'
       ]);
 
     return $item;

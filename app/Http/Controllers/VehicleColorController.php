@@ -103,6 +103,7 @@ class VehicleColorController extends Controller
     }
 
     $item->name = GenController::filter($data->name, 'U');
+    $item->vehicle_brand_id = GenController::filter($data->vehicle_brand_id, 'id');
     $item->save();
 
     return $item;
