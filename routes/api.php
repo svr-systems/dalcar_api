@@ -10,6 +10,7 @@ use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvestorTypeController;
 use App\Http\Controllers\LegacyVehicleController;
+use App\Http\Controllers\LegacyVehicleDocumentController;
 use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\OriginTypeController;
 use App\Http\Controllers\RoleController;
@@ -74,6 +75,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     //Vendors
     Route::apiResource('vendors', VendorCotroller::class);
 
+    //Legacy vehicle documents
+    Route::apiResource('legacy_vehicles/documents', LegacyVehicleDocumentController::class);
+    
     //Legacy vehicles
     Route::apiResource('legacy_vehicles', LegacyVehicleController::class);
 });

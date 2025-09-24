@@ -81,6 +81,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'LegacyVehicleDocument' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/Legacy/Vehicle/Document'),
+            'url' => env('APP_URL') . '/storage',
+            'visibility' => 'public',
+        ],
+
         'temp' => [
             'driver' => 'local',
             'root' => storage_path('app/private/temp'),
