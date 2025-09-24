@@ -5,6 +5,7 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\BranchContrller;
 use App\Http\Controllers\CompanyContrller;
 use App\Http\Controllers\CustomOfficeController;
+use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvestorTypeController;
@@ -54,6 +55,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('vehicle_versions', VehicleVersionController::class);
     Route::apiResource('vehicle_colors', VehicleColorController::class);
     Route::apiResource('expense_types', ExpenseTypeController::class);
+    Route::apiResource('document_types', DocumentTypeController::class);
 
     //Users
     Route::get('users/file/json', [UserController::class, 'getUserFile']);
