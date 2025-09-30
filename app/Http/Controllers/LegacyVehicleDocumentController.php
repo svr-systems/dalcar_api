@@ -107,9 +107,6 @@ class LegacyVehicleDocumentController extends Controller {
 
     $item->legacy_vehicle_id = GenController::filter($data->legacy_vehicle_id, 'id');
     $item->document_type_id = GenController::filter($data->document_type_id, 'id');
-    $item->is_scheduled = GenController::filter($data->is_scheduled, 'b');
-    $item->scheduled_at = GenController::filter($data->scheduled_at, 'd');
-    $item->received_at = GenController::filter($data->received_at, 'd');
     $item->note = GenController::filter($data->note, 'U');
 
     $item->document_path = DocMgrController::save(

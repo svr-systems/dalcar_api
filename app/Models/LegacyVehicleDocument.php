@@ -20,9 +20,6 @@ class LegacyVehicleDocument extends Model {
     $rules = [
       'legacy_vehicle_id' => 'required|numeric',
       'document_type_id' => 'required|numeric',
-      'is_scheduled' => 'required|boolean',
-      'scheduled_at' => 'nullable|date',
-      'received_at' => 'nullable|date',
       'note' => 'nullable|min:2',
     ];
 
@@ -49,9 +46,6 @@ class LegacyVehicleDocument extends Model {
         'id',
         'is_active',
         'document_type_id',
-        'is_scheduled',
-        'scheduled_at',
-        'received_at',
         'document_path',
         'note',
       ]);
@@ -76,9 +70,6 @@ class LegacyVehicleDocument extends Model {
         'created_by_id',
         'updated_by_id',
         'document_type_id',
-        'is_scheduled',
-        'scheduled_at',
-        'received_at',
         'document_path',
         'note',
       ]);
