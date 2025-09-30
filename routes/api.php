@@ -76,7 +76,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('vendors', VendorCotroller::class);
 
     //Legacy vehicle documents
-    Route::apiResource('legacy_vehicle_documents', LegacyVehicleDocumentController::class);
+    Route::apiResource('legacy_vehicles/documents', LegacyVehicleDocumentController::class);
 
     //Legacy vehicles
     Route::apiResource('legacy_vehicles', LegacyVehicleController::class);

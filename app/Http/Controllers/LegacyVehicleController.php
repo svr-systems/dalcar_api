@@ -83,12 +83,6 @@ class LegacyVehicleController extends Controller
         return $this->apiRsp(422, $valid->errors()->first());
       }
 
-      $valid_values = $this->validValues($req);
-
-      if (!$valid_values['response']) {
-        return $this->apiRsp(500, $valid_values['message'], null);
-      }
-
       $store_mode = is_null($id);
 
       if ($store_mode) {
@@ -122,7 +116,6 @@ class LegacyVehicleController extends Controller
 
     $item->branch_id = GenController::filter($data->branch_id, 'id');
     $item->purchase_date = GenController::filter($data->purchase_date, 'd');
-    $item->vendor_id = GenController::filter($data->vendor_id, 'id');
     $item->vehicle_version_id = GenController::filter($data->vehicle_version_id, 'id');
     $item->vehicle_transmission_id = GenController::filter($data->vehicle_transmission_id, 'id');
     $item->vehicle_color_id = GenController::filter($data->vehicle_color_id, 'id');
@@ -130,10 +123,6 @@ class LegacyVehicleController extends Controller
     $item->engine_number = GenController::filter($data->engine_number, 'U');
     $item->repuve = GenController::filter($data->repuve, 'U');
     $item->vehicle_key = GenController::filter($data->vehicle_key, 'U');
-    $item->purchase_price = GenController::filter($data->purchase_price, 'f');
-    $item->commission_amount = GenController::filter($data->commission_amount, 'f');
-    $item->vat_type_id = GenController::filter($data->vat_type_id, 'id');
-    $item->invoice_amount = GenController::filter($data->invoice_amount, 'f');
     $item->notes = GenController::filter($data->notes, 'U');
     $item->origin_type_id = GenController::filter($data->origin_type_id, 'id');
     $item->pediment_number = GenController::filter($data->pediment_number, 'i');
@@ -142,50 +131,17 @@ class LegacyVehicleController extends Controller
     $item->pediment_notes = GenController::filter($data->pediment_notes, 'U');
     $item->save();
 
-    if ($data->legacy_vehicle_investors) {
-      foreach ($data->legacy_vehicle_investors as $legacy_vehicle_investor) {
-        $legacy_vehicle_investor_item = LegacyVehicleInvestor::find($legacy_vehicle_investor['id']);
-        if (!$legacy_vehicle_investor_item) {
-          $legacy_vehicle_investor_item = new LegacyVehicleInvestor;
-        }
-
-        $legacy_vehicle_investor_item->is_active = GenController::filter($legacy_vehicle_investor['is_active'], 'b');
-        $legacy_vehicle_investor_item->investor_id = GenController::filter($legacy_vehicle_investor['investor_id'], 'id');
-        $legacy_vehicle_investor_item->percentages = GenController::filter($legacy_vehicle_investor['percentages'], 'f');
-        $legacy_vehicle_investor_item->amount = GenController::filter($legacy_vehicle_investor['amount'], 'f'); //CALCULAR
-        $legacy_vehicle_investor_item->legacy_vehicle_id = $item->id;
-        $legacy_vehicle_investor_item->save();
-      }
-    }
-
-    if ($data->legacy_vehicle_expenses) {
-      foreach ($data->legacy_vehicle_expenses as $legacy_vehicle_expense) {
-        $legacy_vehicle_expense_item = LegacyVehicleExpense::find($legacy_vehicle_expense['id']);
-        if (!$legacy_vehicle_expense_item) {
-          $legacy_vehicle_expense_item = new LegacyVehicleExpense;
-        }
-
-        $legacy_vehicle_expense_item->is_active = GenController::filter($legacy_vehicle_expense['is_active'], 'b');
-        $legacy_vehicle_expense_item->expense_type_id = GenController::filter($legacy_vehicle_expense['expense_type_id'], 'id');
-        $legacy_vehicle_expense_item->note = GenController::filter($legacy_vehicle_expense['note'], 'U');
-        $legacy_vehicle_expense_item->expense_date = GenController::filter($legacy_vehicle_expense['expense_date'], 'd');
-        $legacy_vehicle_expense_item->amount = GenController::filter($legacy_vehicle_expense['amount'], 'f');
-        $legacy_vehicle_expense_item->legacy_vehicle_id = $item->id;
-        $legacy_vehicle_expense_item->save();
-      }
-    }
-
     return $item;
   }
 
   public static function validValues($req)
   {
-    $purchase_price = GenController::filter($req->purchase_price, 'f');
-    $commission_amount = GenController::filter($req->commission_amount, 'f');
+    // $purchase_price = GenController::filter($req->purchase_price, 'f');
+    // $commission_amount = GenController::filter($req->commission_amount, 'f');
 
-    if ($purchase_price < $commission_amount) {
-      return ['response' => false, 'message' => 'La comisión no puede superar al preció de compra.'];
-    }
+    // if ($purchase_price < $commission_amount) {
+    //   return ['response' => false, 'message' => 'La comisión no puede superar al preció de compra.'];
+    // }
 
     $vehicle_investor_percentages = 0;
 
