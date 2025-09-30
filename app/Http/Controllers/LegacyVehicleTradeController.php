@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LegacyVehicleInvoice;
+use App\Models\LegacyVehicleTrade;
 use DB;
 use Illuminate\Http\Request;
 use Throwable;
 
-class LegacyVehicleInvoiceController extends Controller {
+class LegacyVehicleTradeController extends Controller {
   public function index(Request $req) {
     try {
       return $this->apiRsp(
         200,
         'Registros retornados correctamente',
-        ['items' => LegacyVehicleInvoice::getItems($req)]
+        ['items' => LegacyVehicleTrade::getItems($req)]
       );
     } catch (Throwable $err) {
       return $this->apiRsp(500, null, $err);
@@ -25,7 +25,7 @@ class LegacyVehicleInvoiceController extends Controller {
       return $this->apiRsp(
         200,
         'Registro retornado correctamente',
-        ['item' => LegacyVehicleInvoice::getItem($req, $id)]
+        ['item' => LegacyVehicleTrade::getItem($req, $id)]
       );
     } catch (Throwable $err) {
       return $this->apiRsp(500, null, $err);
@@ -35,7 +35,7 @@ class LegacyVehicleInvoiceController extends Controller {
   public function destroy(Request $req, $id) {
     DB::beginTransaction();
     try {
-      $item = LegacyVehicleInvoice::find($id);
+      $item = LegacyVehicleTrade::find($id);
 
       if (!$item) {
         return $this->apiRsp(422, 'ID no existente');
@@ -54,7 +54,6 @@ class LegacyVehicleInvoiceController extends Controller {
       DB::rollback();
       return $this->apiRsp(500, null, $err);
     }
-
   }
 
   public function store(Request $req) {
@@ -69,7 +68,7 @@ class LegacyVehicleInvoiceController extends Controller {
     DB::beginTransaction();
     try {
 
-      $valid = LegacyVehicleInvoice::valid($req->all());
+      $valid = LegacyVehicleTrade::valid($req->all());
 
       if ($valid->fails()) {
         return $this->apiRsp(422, $valid->errors()->first());
@@ -78,11 +77,11 @@ class LegacyVehicleInvoiceController extends Controller {
       $store_mode = is_null($id);
 
       if ($store_mode) {
-        $item = new LegacyVehicleInvoice;
+        $item = new LegacyVehicleTrade;
         $item->created_by_id = $req->user()->id;
         $item->updated_by_id = $req->user()->id;
       } else {
-        $item = LegacyVehicleInvoice::find($id);
+        $item = LegacyVehicleTrade::find($id);
         $item->updated_by_id = $req->user()->id;
       }
 
@@ -106,15 +105,14 @@ class LegacyVehicleInvoiceController extends Controller {
     }
 
     $item->legacy_vehicle_id = GenController::filter($data->legacy_vehicle_id, 'id');
-    $item->document_type_id = GenController::filter($data->document_type_id, 'id');
+    $item->is_purchase = GenController::filter($data->is_purchase, 'b');
+    $item->vendor_id = GenController::filter($data->vendor_id, 'id');
+    $item->purchase_price = GenController::filter($data->purchase_price, 'f');
+    $item->commission_amount = GenController::filter($data->commission_amount, 'f');
+    $item->vat_type_id = GenController::filter($data->vat_type_id, 'id');
+    $item->invoice_amount = GenController::filter($data->invoice_amount, 'f');
+    $item->sale_price = GenController::filter($data->sale_price, 'f');
     $item->note = GenController::filter($data->note, 'U');
-
-    $item->document_path = DocMgrController::save(
-      $data->document_path,
-      DocMgrController::exist($data->document_doc),
-      $data->document_dlt,
-      'LegacyVehicleInvoice'
-    );
     $item->save();
 
     return $item;
