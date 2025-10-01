@@ -7,8 +7,10 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Validator;
 
-class LegacyVehicleTrade extends Model {
-  protected function serializeDate(DateTimeInterface $date) {
+class LegacyVehicleTrade extends Model
+{
+  protected function serializeDate(DateTimeInterface $date)
+  {
     return Carbon::instance($date)->toISOString(true);
   }
   protected $casts = [
@@ -16,39 +18,37 @@ class LegacyVehicleTrade extends Model {
     'updated_at' => 'datetime:Y-m-d H:i:s',
   ];
 
-  public static function valid($data, $is_req = true) {
+  public static function valid($data)
+  {
     $rules = [
       'legacy_vehicle_id' => 'required|numeric',
       'is_purchase' => 'required|boolean',
-      'vendor_id' => 'required|numeric',
-      'purchase_price' => 'required|numeric',
-      'commission_amount' => 'required|numeric',
+      'vendor_id' => 'nullable|numeric',
+      'purchase_price' => 'nullable|numeric',
+      'commission_amount' => 'nullable|numeric',
       'vat_type_id' => 'required|numeric',
       'invoice_amount' => 'nullable|numeric',
       'sale_price' => 'nullable|numeric',
       'note' => 'nullable|min:2',
     ];
 
-    if (!$is_req) {
-      array_push($rules, ['is_active' => 'required|in:true,false,1,0']);
-    }
-
     $msgs = [];
 
     return Validator::make($data, $rules, $msgs);
   }
 
-  static public function getUiid($id) {
+  static public function getUiid($id)
+  {
     return 'LVT-' . str_pad($id, 4, '0', STR_PAD_LEFT);
   }
 
-  static public function getItems($req) {
-    $items = LegacyVehicleTrade::query()->
-      where('legacy_vehicle_id', $req->legacy_vehicle_id)->
-      where('is_active', boolval($req->is_active))->
-      get([
+  static public function getItems($req)
+  {
+    $items = LegacyVehicleTrade::query()
+      ->where('legacy_vehicle_id', $req->legacy_vehicle_id)
+      ->where('is_active', boolval($req->is_active))
+      ->get([
         'id',
-        'is_active',
         'is_purchase',
         'vendor_id',
         'purchase_price',
@@ -59,10 +59,7 @@ class LegacyVehicleTrade extends Model {
         'note',
       ]);
 
-    foreach ($items as $key => $item) {
-      $item->key = $key;
-      $item->uiid = LegacyVehicleTrade::getUiid($item->id);
-
+    foreach ($items as $item) {
       $item->vendor = Vendor::find($item->vendor_id, ['name']);
       $item->vat_type = VatType::find($item->vat_type_id, ['name']);
     }
@@ -70,7 +67,8 @@ class LegacyVehicleTrade extends Model {
     return $items;
   }
 
-  static public function getItem($req, $id) {
+  static public function getItem($req, $id)
+  {
     $item = LegacyVehicleTrade::find($id, [
       'id',
       'is_active',

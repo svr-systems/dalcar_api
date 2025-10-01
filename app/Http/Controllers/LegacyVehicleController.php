@@ -24,13 +24,13 @@ class LegacyVehicleController extends Controller
     }
   }
 
-  public function show(Request $req, $id)
+  public function show($id)
   {
     try {
       return $this->apiRsp(
         200,
         'Registro retornado correctamente',
-        ['item' => LegacyVehicle::getItem($req, $id)]
+        ['item' => LegacyVehicle::getItem($id)]
       );
     } catch (Throwable $err) {
       return $this->apiRsp(500, null, $err);
@@ -47,7 +47,7 @@ class LegacyVehicleController extends Controller
         return $this->apiRsp(422, 'ID no existente');
       }
 
-      $item->is_active = false;
+      $item->is_active = 0;
       $item->updated_by_id = $req->user()->id;
       $item->save();
 
@@ -55,6 +55,32 @@ class LegacyVehicleController extends Controller
       return $this->apiRsp(
         200,
         'Registro inactivado correctamente'
+      );
+    } catch (Throwable $err) {
+      DB::rollback();
+      return $this->apiRsp(500, null, $err);
+    }
+  }
+
+  public function restore(Request $req)
+  {
+    DB::beginTransaction();
+    try {
+      $item = LegacyVehicle::find($req->id);
+
+      if (!$item) {
+        return $this->apiRsp(422, 'ID no existente');
+      }
+
+      $item->is_active = 1;
+      $item->updated_by_id = $req->user()->id;
+      $item->save();
+
+      DB::commit();
+      return $this->apiRsp(
+        200,
+        'Registro activado correctamente',
+        ['item' => LegacyVehicle::getItem($item->id)]
       );
     } catch (Throwable $err) {
       DB::rollback();
@@ -117,8 +143,8 @@ class LegacyVehicleController extends Controller
     $item->branch_id = GenController::filter($data->branch_id, 'id');
     $item->purchase_date = GenController::filter($data->purchase_date, 'd');
     $item->vehicle_version_id = GenController::filter($data->vehicle_version_id, 'id');
-    $item->vehicle_transmission_id = GenController::filter($data->vehicle_transmission_id, 'id');
     $item->vehicle_color_id = GenController::filter($data->vehicle_color_id, 'id');
+    $item->vehicle_transmission_id = GenController::filter($data->vehicle_transmission_id, 'id');
     $item->vin = GenController::filter($data->vin, 'U');
     $item->engine_number = GenController::filter($data->engine_number, 'U');
     $item->repuve = GenController::filter($data->repuve, 'U');
@@ -132,29 +158,5 @@ class LegacyVehicleController extends Controller
     $item->save();
 
     return $item;
-  }
-
-  public static function validValues($req)
-  {
-    // $purchase_price = GenController::filter($req->purchase_price, 'f');
-    // $commission_amount = GenController::filter($req->commission_amount, 'f');
-
-    // if ($purchase_price < $commission_amount) {
-    //   return ['response' => false, 'message' => 'La comisión no puede superar al preció de compra.'];
-    // }
-
-    $vehicle_investor_percentages = 0;
-
-    if ($req->legacy_vehicle_investors) {
-      foreach ($req->legacy_vehicle_investors as $legacy_vehicle_investor) {
-        $vehicle_investor_percentages += GenController::filter($legacy_vehicle_investor['percentages'], 'f');
-      }
-    }
-
-    if ($vehicle_investor_percentages !== floatval(100)) {
-      return ['response' => false, 'message' => 'La suma de los porcentajes debe ser del 100%.'];
-    }
-
-    return ['response' => true];
   }
 }

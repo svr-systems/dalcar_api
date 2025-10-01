@@ -9,8 +9,10 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Validator;
 
-class LegacyVehicle extends Model {
-  protected function serializeDate(DateTimeInterface $date) {
+class LegacyVehicle extends Model
+{
+  protected function serializeDate(DateTimeInterface $date)
+  {
     return Carbon::instance($date)->toISOString(true);
   }
   protected $casts = [
@@ -18,13 +20,14 @@ class LegacyVehicle extends Model {
     'updated_at' => 'datetime:Y-m-d H:i:s',
   ];
 
-  public static function valid($data, $is_req = true) {
+  public static function valid($data)
+  {
     $rules = [
       'branch_id' => 'required|numeric',
       'purchase_date' => 'required|date',
       'vehicle_version_id' => 'required|numeric',
-      'vehicle_transmission_id' => 'required|numeric',
       'vehicle_color_id' => 'required|numeric',
+      'vehicle_transmission_id' => 'required|numeric',
       'vin' => 'required|min:2|max:17',
       'engine_number' => 'nullable|min:2|max:30',
       'repuve' => 'nullable|min:2|max:25',
@@ -37,20 +40,18 @@ class LegacyVehicle extends Model {
       'pediment_notes' => 'nullable',
     ];
 
-    if (!$is_req) {
-      array_push($rules, ['is_active' => 'required|in:true,false,1,0']);
-    }
-
     $msgs = [];
 
     return Validator::make($data, $rules, $msgs);
   }
 
-  static public function getUiid($id) {
+  static public function getUiid($id)
+  {
     return 'AH-' . str_pad($id, 4, '0', STR_PAD_LEFT);
   }
 
-  static public function getItems($req) {
+  static public function getItems($req)
+  {
     $items = LegacyVehicle::query()
       ->where('is_active', boolval($req->is_active))
       ->orderByDesc('purchase_date')
@@ -66,7 +67,6 @@ class LegacyVehicle extends Model {
     foreach ($items as $key => $item) {
       $item->key = $key;
       $item->uiid = LegacyVehicle::getUiid($item->id);
-
       $item->vehicle_version = VehicleVersion::find($item->vehicle_version_id, ['name', 'vehicle_model_id', 'model_year']);
       $item->vehicle_version->vehicle_model = VehicleModel::find($item->vehicle_version->vehicle_model_id, ['name', 'vehicle_brand_id']);
       $item->vehicle_version->vehicle_model->vehicle_brand = VehicleBrand::find($item->vehicle_version->vehicle_model->vehicle_brand_id, ['name']);
@@ -76,7 +76,8 @@ class LegacyVehicle extends Model {
     return $items;
   }
 
-  static public function getItem($req, $id) {
+  static public function getItem($id)
+  {
     $item = LegacyVehicle::find($id, [
       'id',
       'is_active',
@@ -87,8 +88,8 @@ class LegacyVehicle extends Model {
       'branch_id',
       'purchase_date',
       'vehicle_version_id',
-      'vehicle_transmission_id',
       'vehicle_color_id',
+      'vehicle_transmission_id',
       'vin',
       'engine_number',
       'repuve',
@@ -105,21 +106,13 @@ class LegacyVehicle extends Model {
     $item->created_by = User::find($item->created_by_id, ['email']);
     $item->updated_by = User::find($item->updated_by_id, ['email']);
     $item->branch = Branch::find($item->branch_id, ['name']);
-
     $item->vehicle_version = VehicleVersion::find($item->vehicle_version_id, ['name', 'vehicle_model_id', 'model_year']);
     $item->vehicle_version->vehicle_model = VehicleModel::find($item->vehicle_version->vehicle_model_id, ['name', 'vehicle_brand_id']);
     $item->vehicle_version->vehicle_model->vehicle_brand = VehicleBrand::find($item->vehicle_version->vehicle_model->vehicle_brand_id, ['name']);
-    $item->vehicle_transmission = VehicleTransmission::find($item->vehicle_transmission_id, ['name']);
     $item->vehicle_color = VehicleColor::find($item->vehicle_color_id, ['name']);
+    $item->vehicle_transmission = VehicleTransmission::find($item->vehicle_transmission_id, ['name']);
     $item->origin_type = OriginType::find($item->origin_type_id, ['name']);
     $item->custom_office = CustomOffice::find($item->custom_office_id, ['name']);
-
-    // foreach ($item->legacy_vehicle_document_bills as $legacy_vehicle_document_bill) {
-    //     $legacy_vehicle_document_bill->document_type = DocumentType::find($legacy_vehicle_document_bill->document_type_id, ['name']);
-    //     $legacy_vehicle_document_bill->document_b64 = DocMgrController::getB64($legacy_vehicle_document_bill->document_path, 'LegacyVehicleDocument');
-    //     $legacy_vehicle_document_bill->document_doc = null;
-    //     $legacy_vehicle_document_bill->document_dlt = false;
-    // }
 
     return $item;
   }

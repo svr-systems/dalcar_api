@@ -7,8 +7,10 @@ use DB;
 use Illuminate\Http\Request;
 use Throwable;
 
-class LegacyVehicleTradeController extends Controller {
-  public function index(Request $req) {
+class LegacyVehicleTradeController extends Controller
+{
+  public function index(Request $req)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -20,7 +22,8 @@ class LegacyVehicleTradeController extends Controller {
     }
   }
 
-  public function show(Request $req, $id) {
+  public function show(Request $req, $id)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -32,7 +35,8 @@ class LegacyVehicleTradeController extends Controller {
     }
   }
 
-  public function destroy(Request $req, $id) {
+  public function destroy(Request $req, $id)
+  {
     DB::beginTransaction();
     try {
       $item = LegacyVehicleTrade::find($id);
@@ -56,15 +60,18 @@ class LegacyVehicleTradeController extends Controller {
     }
   }
 
-  public function store(Request $req) {
+  public function store(Request $req)
+  {
     return $this->storeUpdate($req, null);
   }
 
-  public function update(Request $req, $id) {
+  public function update(Request $req, $id)
+  {
     return $this->storeUpdate($req, $id);
   }
 
-  public function storeUpdate($req, $id) {
+  public function storeUpdate($req, $id)
+  {
     DB::beginTransaction();
     try {
 
@@ -99,7 +106,8 @@ class LegacyVehicleTradeController extends Controller {
     }
   }
 
-  public static function saveItem($item, $data, $is_req = true) {
+  public static function saveItem($item, $data, $is_req = true)
+  {
     if (!$is_req) {
       $item->active = GenController::filter($data->active, 'b');
     }
@@ -107,11 +115,11 @@ class LegacyVehicleTradeController extends Controller {
     $item->legacy_vehicle_id = GenController::filter($data->legacy_vehicle_id, 'id');
     $item->is_purchase = GenController::filter($data->is_purchase, 'b');
     $item->vendor_id = GenController::filter($data->vendor_id, 'id');
-    $item->purchase_price = GenController::filter($data->purchase_price, 'f');
-    $item->commission_amount = GenController::filter($data->commission_amount, 'f');
+    $item->purchase_price = is_null($data->purchase_price) ? null : GenController::filter($data->purchase_price, 'f');
+    $item->commission_amount = is_null($data->commission_amount) ? null : GenController::filter($data->commission_amount, 'f');
     $item->vat_type_id = GenController::filter($data->vat_type_id, 'id');
-    $item->invoice_amount = GenController::filter($data->invoice_amount, 'f');
-    $item->sale_price = GenController::filter($data->sale_price, 'f');
+    $item->invoice_amount = is_null($data->invoice_amount) ? null : GenController::filter($data->invoice_amount, 'f');
+    $item->sale_price = is_null($data->sale_price) ? null : GenController::filter($data->sale_price, 'f');
     $item->note = GenController::filter($data->note, 'U');
     $item->save();
 
