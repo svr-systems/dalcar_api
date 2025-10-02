@@ -6,49 +6,43 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Validator;
 
-class ExpenseType extends Model {
+class ExpenseType extends Model
+{
   use HasFactory;
   public $timestamps = false;
 
-  public static function valid($data, $is_req = true) {
+  public static function valid($data)
+  {
     $rules = [
       'name' => 'required|min:2|max:60',
     ];
-
-    if (!$is_req) {
-      array_push($rules, ['is_active' => 'required|in:true,false,1,0']);
-    }
 
     $msgs = [];
 
     return Validator::make($data, $rules, $msgs);
   }
 
-  static public function getItems($req) {
-    $items = ExpenseType::
-    where('is_active', boolval($req->is_active));
-
-    $items = $items->
-    get([
+  static public function getItems($req)
+  {
+    $items = ExpenseType::query()
+      ->where('is_active', boolval($req->is_active))
+      ->orderBy('name')
+      ->get([
         'id',
         'is_active',
         'name',
       ]);
-
-    foreach ($items as $key => $item) {
-      $item->key = $key;
-    }
 
     return $items;
   }
 
-  static public function getItem($req, $id) {
-    $item = ExpenseType::
-    find($id, [
-        'id',
-        'is_active',
-        'name',
-      ]);
+  static public function getItem($req, $id)
+  {
+    $item = ExpenseType::find($id, [
+      'id',
+      'is_active',
+      'name',
+    ]);
 
     return $item;
   }

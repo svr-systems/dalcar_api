@@ -9,7 +9,8 @@ use Throwable;
 
 class ExpenseTypeController extends Controller
 {
-  public function index(Request $req) {
+  public function index(Request $req)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -21,7 +22,8 @@ class ExpenseTypeController extends Controller
     }
   }
 
-  public function show(Request $req, $id) {
+  public function show(Request $req, $id)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -33,7 +35,8 @@ class ExpenseTypeController extends Controller
     }
   }
 
-  public function destroy(Request $req, $id) {
+  public function destroy(Request $req, $id)
+  {
     DB::beginTransaction();
     try {
       $item = ExpenseType::find($id);
@@ -57,15 +60,18 @@ class ExpenseTypeController extends Controller
 
   }
 
-  public function store(Request $req) {
+  public function store(Request $req)
+  {
     return $this->storeUpdate($req, null);
   }
 
-  public function update(Request $req, $id) {
+  public function update(Request $req, $id)
+  {
     return $this->storeUpdate($req, $id);
   }
 
-  public function storeUpdate($req, $id) {
+  public function storeUpdate($req, $id)
+  {
     DB::beginTransaction();
     try {
 
@@ -97,11 +103,8 @@ class ExpenseTypeController extends Controller
     }
   }
 
-  public static function saveItem($item, $data, $is_req = true) {
-    if (!$is_req) {
-      $item->active = GenController::filter($data->active, 'b');
-    }
-
+  public static function saveItem($item, $data)
+  {
     $item->name = GenController::filter($data->name, 'U');
     $item->save();
 

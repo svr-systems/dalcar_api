@@ -20,7 +20,7 @@ class LegacyVehicleInvestor extends Model
     'updated_at' => 'datetime:Y-m-d H:i:s',
   ];
 
-  public static function valid($data, $is_req = true)
+  public static function valid($data)
   {
     $rules = [
       'legacy_vehicle_id' => 'required|numeric',
@@ -29,10 +29,6 @@ class LegacyVehicleInvestor extends Model
       'amount' => 'nullable|numeric',
     ];
 
-    if (!$is_req) {
-      array_push($rules, ['is_active' => 'required|in:true,false,1,0']);
-    }
-
     $msgs = [];
 
     return Validator::make($data, $rules, $msgs);
@@ -40,7 +36,7 @@ class LegacyVehicleInvestor extends Model
 
   static public function getUiid($id)
   {
-    return 'LVI-' . str_pad($id, 4, '0', STR_PAD_LEFT);
+    return 'VHI-' . str_pad($id, 4, '0', STR_PAD_LEFT);
   }
 
   static public function getItems($req)
@@ -67,26 +63,12 @@ class LegacyVehicleInvestor extends Model
 
   static public function getItem($req, $id)
   {
-    $item = LegacyVehicleInvestor::
-      where('id', $id)->
-      find($id, [
-        'id',
-        'is_active',
-        'created_at',
-        'updated_at',
-        'created_by_id',
-        'updated_by_id',
-        'investor_id',
-        'percentages',
-        'amount',
-      ]);
-
-    if ($item) {
-      $item->created_by = User::find($item->created_by_id, ['email']);
-      $item->updated_by = User::find($item->updated_by_id, ['email']);
-      $item->investor = Investor::find($item->investor_id);
-      $item->uiid = LegacyVehicleInvestor::getUiid($item->id);
-    }
+    $item = LegacyVehicleInvestor::find($id);
+    $item->created_by = User::find($item->created_by_id, ['email']);
+    $item->updated_by = User::find($item->updated_by_id, ['email']);
+    $item->investor = Investor::find($item->investor_id, ['user_id']);
+    $item->investor->user = User::find($item->investor->user_id, ['name', 'paternal_surname', 'maternal_surname']);
+    $item->investor->user->full_name = GenController::getFullName($item->investor->user);
 
     return $item;
   }

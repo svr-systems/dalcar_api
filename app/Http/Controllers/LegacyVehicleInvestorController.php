@@ -75,7 +75,6 @@ class LegacyVehicleInvestorController extends Controller
   {
     DB::beginTransaction();
     try {
-
       $valid = LegacyVehicleInvestor::valid($req->all());
 
       if ($valid->fails()) {
@@ -107,17 +106,12 @@ class LegacyVehicleInvestorController extends Controller
     }
   }
 
-  public static function saveItem($item, $data, $is_req = true)
+  public static function saveItem($item, $data)
   {
-    if (!$is_req) {
-      $item->active = GenController::filter($data->active, 'b');
-    }
-
     $item->legacy_vehicle_id = GenController::filter($data->legacy_vehicle_id, 'id');
     $item->investor_id = GenController::filter($data->investor_id, 'id');
     $item->percentages = GenController::filter($data->percentages, 'f');
     $item->amount = GenController::filter($data->amount, 'f');
-
     $item->save();
 
     return $item;
