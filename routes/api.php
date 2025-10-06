@@ -56,6 +56,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('users', UserController::class);
 
     //Catalogs CRUD
+    Route::apiResource('vehicle_transmissions', VehicleTransmissionController::class);
     Route::apiResource('expense_types', ExpenseTypeController::class);
     Route::apiResource('document_types', DocumentTypeController::class);
     Route::apiResource('vehicle_colors', VehicleColorController::class);
@@ -64,10 +65,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('vehicle_brands', VehicleBrandController::class);
 
     //Catalogs
-    Route::get('customs_offices', [CustomOfficeController::class, 'index']);
+    Route::get('custom_offices', [CustomOfficeController::class, 'index']);
     Route::get('origin_types', [OriginTypeController::class, 'index']);
     Route::get('vat_types', [VatTypeController::class, 'index']);
-    Route::get('vehicle_transmissions', [VehicleTransmissionController::class, 'index']);
     Route::get('investor_types', [InvestorTypeController::class, 'index']);
     Route::get('banks', [BankController::class, 'index']);
     Route::get('vendor_types', [VendorTypeController::class, 'index']);
