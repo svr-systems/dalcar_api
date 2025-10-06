@@ -56,6 +56,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('users', UserController::class);
 
     //Catalogs CRUD
+    Route::apiResource('custom_offices', CustomOfficeController::class);
     Route::apiResource('vehicle_transmissions', VehicleTransmissionController::class);
     Route::apiResource('expense_types', ExpenseTypeController::class);
     Route::apiResource('document_types', DocumentTypeController::class);
@@ -65,7 +66,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('vehicle_brands', VehicleBrandController::class);
 
     //Catalogs
-    Route::get('custom_offices', [CustomOfficeController::class, 'index']);
     Route::get('origin_types', [OriginTypeController::class, 'index']);
     Route::get('vat_types', [VatTypeController::class, 'index']);
     Route::get('investor_types', [InvestorTypeController::class, 'index']);
