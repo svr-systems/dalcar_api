@@ -9,10 +9,8 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Validator;
 
-class LegacyVehicle extends Model
-{
-  protected function serializeDate(DateTimeInterface $date)
-  {
+class LegacyVehicle extends Model {
+  protected function serializeDate(DateTimeInterface $date) {
     return Carbon::instance($date)->toISOString(true);
   }
   protected $casts = [
@@ -20,8 +18,7 @@ class LegacyVehicle extends Model
     'updated_at' => 'datetime:Y-m-d H:i:s',
   ];
 
-  public static function valid($data)
-  {
+  public static function valid($data) {
     $rules = [
       'branch_id' => 'required|numeric',
       'purchase_date' => 'required|date',
@@ -45,13 +42,11 @@ class LegacyVehicle extends Model
     return Validator::make($data, $rules, $msgs);
   }
 
-  static public function getUiid($id)
-  {
+  static public function getUiid($id) {
     return 'AH-' . str_pad($id, 4, '0', STR_PAD_LEFT);
   }
 
-  static public function getItems($req)
-  {
+  static public function getItems($req) {
     $items = LegacyVehicle::query()
       ->where('is_active', boolval($req->is_active))
       ->orderByDesc('purchase_date')
@@ -76,8 +71,7 @@ class LegacyVehicle extends Model
     return $items;
   }
 
-  static public function getItem($id)
-  {
+  static public function getItem($id) {
     $item = LegacyVehicle::find($id, [
       'id',
       'is_active',
@@ -100,6 +94,7 @@ class LegacyVehicle extends Model
       'pediment_date',
       'custom_office_id',
       'pediment_notes',
+      'passenger_capacity'
     ]);
 
     $item->uiid = LegacyVehicle::getUiid($item->id);

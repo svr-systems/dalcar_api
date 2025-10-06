@@ -9,10 +9,8 @@ use DB;
 use Illuminate\Http\Request;
 use Throwable;
 
-class LegacyVehicleController extends Controller
-{
-  public function index(Request $req)
-  {
+class LegacyVehicleController extends Controller {
+  public function index(Request $req) {
     try {
       return $this->apiRsp(
         200,
@@ -24,8 +22,7 @@ class LegacyVehicleController extends Controller
     }
   }
 
-  public function show($id)
-  {
+  public function show($id) {
     try {
       return $this->apiRsp(
         200,
@@ -37,8 +34,7 @@ class LegacyVehicleController extends Controller
     }
   }
 
-  public function destroy(Request $req, $id)
-  {
+  public function destroy(Request $req, $id) {
     DB::beginTransaction();
     try {
       $item = LegacyVehicle::find($id);
@@ -62,8 +58,7 @@ class LegacyVehicleController extends Controller
     }
   }
 
-  public function restore(Request $req)
-  {
+  public function restore(Request $req) {
     DB::beginTransaction();
     try {
       $item = LegacyVehicle::find($req->id);
@@ -88,18 +83,15 @@ class LegacyVehicleController extends Controller
     }
   }
 
-  public function store(Request $req)
-  {
+  public function store(Request $req) {
     return $this->storeUpdate($req, null);
   }
 
-  public function update(Request $req, $id)
-  {
+  public function update(Request $req, $id) {
     return $this->storeUpdate($req, $id);
   }
 
-  public function storeUpdate($req, $id)
-  {
+  public function storeUpdate($req, $id) {
     DB::beginTransaction();
     try {
 
@@ -134,8 +126,7 @@ class LegacyVehicleController extends Controller
     }
   }
 
-  public static function saveItem($item, $data, $is_req = true)
-  {
+  public static function saveItem($item, $data, $is_req = true) {
     if (!$is_req) {
       $item->active = GenController::filter($data->active, 'b');
     }
@@ -155,6 +146,7 @@ class LegacyVehicleController extends Controller
     $item->pediment_date = GenController::filter($data->pediment_date, 'd');
     $item->custom_office_id = GenController::filter($data->custom_office_id, 'id');
     $item->pediment_notes = GenController::filter($data->pediment_notes, 'U');
+    $item->passenger_capacity = GenController::filter($data->passenger_capacity, 'i');
     $item->save();
 
     return $item;
