@@ -8,8 +8,10 @@ use DB;
 use Illuminate\Http\Request;
 use Throwable;
 
-class VendorCotroller extends Controller {
-  public function index(Request $req) {
+class VendorCotroller extends Controller
+{
+  public function index(Request $req)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -21,7 +23,8 @@ class VendorCotroller extends Controller {
     }
   }
 
-  public function show(Request $req, $id) {
+  public function show(Request $req, int $id)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -33,45 +36,57 @@ class VendorCotroller extends Controller {
     }
   }
 
-  public function destroy(Request $req, $id) {
+  public function destroy(Request $req, int $id)
+  {
     DB::beginTransaction();
     try {
       $item = Vendor::find($id);
-
-      if (!$item) {
-        return $this->apiRsp(422, 'ID no existente');
-      }
-
-      $item->is_active = false;
+      $item->is_active = 0;
       $item->updated_by_id = $req->user()->id;
       $item->save();
 
       DB::commit();
-      return $this->apiRsp(
-        200,
-        'Registro inactivado correctamente'
-      );
+      return $this->apiRsp(200, 'Registro eliminado correctamente');
     } catch (Throwable $err) {
       DB::rollback();
       return $this->apiRsp(500, null, $err);
     }
-
   }
 
-  public function store(Request $req) {
+  public function restore(Request $req)
+  {
+    DB::beginTransaction();
+    try {
+      $item = Vendor::find($req->id);
+      $item->is_active = 1;
+      $item->updated_by_id = $req->user()->id;
+      $item->save();
+
+      DB::commit();
+      return $this->apiRsp(200, 'Registro activado correctamente', [
+        'item' => Vendor::getItem($req, $item->id)
+      ]);
+    } catch (Throwable $err) {
+      DB::rollback();
+      return $this->apiRsp(500, null, $err);
+    }
+  }
+
+  public function store(Request $req)
+  {
     return $this->storeUpdate($req, null);
   }
 
-  public function update(Request $req, $id) {
+  public function update(Request $req, int $id)
+  {
     return $this->storeUpdate($req, $id);
   }
 
-  public function storeUpdate($req, $id) {
+  public function storeUpdate($req, int $id)
+  {
     DB::beginTransaction();
     try {
-
       $valid = Vendor::valid($req->all());
-
       if ($valid->fails()) {
         return $this->apiRsp(422, $valid->errors()->first());
       }
@@ -101,33 +116,29 @@ class VendorCotroller extends Controller {
     }
   }
 
-  public static function saveItem($item, $data, $is_req = true) {
-    if (!$is_req) {
-      $item->active = GenController::filter($data->active, 'b');
-    }
-
+  public static function saveItem($item, $data)
+  {
     $item->name = GenController::filter($data->name, 'U');
     $item->vendor_type_id = GenController::filter($data->vendor_type_id, 'id');
     $item->payment_days = GenController::filter($data->payment_days, 'i');
-
     $item->save();
 
-    if ($data->vendor_banks) {
-      foreach ($data->vendor_banks as $vendor_bank) {
-        $vendor_bank_item = VendorBank::find($vendor_bank['id']);
-        if (!$vendor_bank_item) {
-          $vendor_bank_item = new VendorBank;
-        }
-        $vendor_bank_item->is_active = GenController::filter($vendor_bank['is_active'], 'b');
-        $vendor_bank_item->bank_id = GenController::filter($vendor_bank['bank_id'], 'id');
-        $vendor_bank_item->account_holder = GenController::filter($vendor_bank['account_holder'], 'U');
-        $vendor_bank_item->clabe_number = GenController::filter($vendor_bank['clabe_number'], 'U');
-        $vendor_bank_item->account_number = GenController::filter($vendor_bank['account_number'], 'U');
-        $vendor_bank_item->vendor_id = $item->id;
-        $vendor_bank_item->save();
+    $vendor_banks = json_decode(json_encode($data->vendor_banks));
+    foreach ($vendor_banks as $vendor_bank) {
+      $vendor_bank_item = VendorBank::find($vendor_bank->id);
+      if (!$vendor_bank_item) {
+        $vendor_bank_item = new VendorBank;
       }
+
+      $vendor_bank_item->is_active = GenController::filter($vendor_bank->is_active, 'b');
+      $vendor_bank_item->bank_id = GenController::filter($vendor_bank->bank_id, 'id');
+      $vendor_bank_item->account_holder = GenController::filter($vendor_bank->account_holder, 'U');
+      $vendor_bank_item->clabe_number = GenController::filter($vendor_bank->clabe_number, 'U');
+      $vendor_bank_item->account_number = GenController::filter($vendor_bank->account_number, 'U');
+      $vendor_bank_item->vendor_id = $item->id;
+      $vendor_bank_item->save();
     }
-    
+
     return $item;
   }
 }

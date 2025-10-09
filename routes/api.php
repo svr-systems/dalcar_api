@@ -30,8 +30,16 @@ use App\Http\Controllers\VendorCotroller;
 use App\Http\Controllers\VendorTypeController;
 use Illuminate\Support\Facades\Route;
 
+/**
+ * Public
+ */
 Route::post('login', [AuthController::class, 'login']);
 
+/**
+ * ===========================================
+ * System
+ * ===========================================
+ */
 Route::group(['middleware' => 'auth:api'], function () {
     Route::group(['prefix' => 'legacy_vehicles'], function () {
         Route::apiResource('legacy_vehicle_invoices', LegacyVehicleInvoiceController::class);
@@ -45,6 +53,12 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     Route::apiResource('investors', InvestorController::class);
 
+    /**
+     * Vendor
+     */
+    Route::group(['prefix' => 'vendors'], function () {
+        Route::post('restore', [VendorCotroller::class, 'restore']);
+    });
     Route::apiResource('vendors', VendorCotroller::class);
 
     Route::apiResource('companies/branches', BranchContrller::class);
@@ -55,7 +69,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('users/dni', [UserController::class, 'getDni']);
     Route::apiResource('users', UserController::class);
 
-    //Catalogs CRUD
+    /**
+     * Catalogs CRUD
+     */
     Route::apiResource('custom_offices', CustomOfficeController::class);
     Route::apiResource('vehicle_transmissions', VehicleTransmissionController::class);
     Route::apiResource('expense_types', ExpenseTypeController::class);
@@ -65,7 +81,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('vehicle_models', VehicleModelController::class);
     Route::apiResource('vehicle_brands', VehicleBrandController::class);
 
-    //Catalogs
+    /**
+     * Catalogs
+     */
     Route::get('origin_types', [OriginTypeController::class, 'index']);
     Route::get('vat_types', [VatTypeController::class, 'index']);
     Route::get('investor_types', [InvestorTypeController::class, 'index']);
