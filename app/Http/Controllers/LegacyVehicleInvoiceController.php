@@ -7,8 +7,10 @@ use DB;
 use Illuminate\Http\Request;
 use Throwable;
 
-class LegacyVehicleInvoiceController extends Controller {
-  public function index(Request $req) {
+class LegacyVehicleInvoiceController extends Controller
+{
+  public function index(Request $req)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -20,7 +22,8 @@ class LegacyVehicleInvoiceController extends Controller {
     }
   }
 
-  public function show(Request $req, $id) {
+  public function show(Request $req, $id)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -32,7 +35,8 @@ class LegacyVehicleInvoiceController extends Controller {
     }
   }
 
-  public function destroy(Request $req, $id) {
+  public function destroy(Request $req, $id)
+  {
     DB::beginTransaction();
     try {
       $item = LegacyVehicleInvoice::find($id);
@@ -54,23 +58,23 @@ class LegacyVehicleInvoiceController extends Controller {
       DB::rollback();
       return $this->apiRsp(500, null, $err);
     }
-
   }
 
-  public function store(Request $req) {
+  public function store(Request $req)
+  {
     return $this->storeUpdate($req, null);
   }
 
-  public function update(Request $req, $id) {
+  public function update(Request $req, $id)
+  {
     return $this->storeUpdate($req, $id);
   }
 
-  public function storeUpdate($req, $id) {
+  public function storeUpdate($req, $id)
+  {
     DB::beginTransaction();
     try {
-
       $valid = LegacyVehicleInvoice::valid($req->all());
-
       if ($valid->fails()) {
         return $this->apiRsp(422, $valid->errors()->first());
       }
@@ -100,21 +104,16 @@ class LegacyVehicleInvoiceController extends Controller {
     }
   }
 
-  public static function saveItem($item, $data, $is_req = true) {
-    if (!$is_req) {
-      $item->active = GenController::filter($data->active, 'b');
-    }
-
+  public static function saveItem($item, $data)
+  {
     $item->legacy_vehicle_id = GenController::filter($data->legacy_vehicle_id, 'id');
-    $item->document_type_id = GenController::filter($data->document_type_id, 'id');
-    $item->note = GenController::filter($data->note, 'U');
-
     $item->document_path = DocMgrController::save(
       $data->document_path,
       DocMgrController::exist($data->document_doc),
       $data->document_dlt,
       'LegacyVehicleInvoice'
     );
+    $item->note = GenController::filter($data->note, 'U');
     $item->save();
 
     return $item;

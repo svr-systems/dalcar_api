@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\DocMgrController;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Validator;
 
-class LegacyVehicleDocument extends Model {
-  protected function serializeDate(DateTimeInterface $date) {
+class LegacyVehicleDocument extends Model
+{
+  protected function serializeDate(DateTimeInterface $date)
+  {
     return Carbon::instance($date)->toISOString(true);
   }
   protected $casts = [
@@ -16,70 +19,47 @@ class LegacyVehicleDocument extends Model {
     'updated_at' => 'datetime:Y-m-d H:i:s',
   ];
 
-  public static function valid($data, $is_req = true) {
+  public static function valid($data)
+  {
     $rules = [
       'legacy_vehicle_id' => 'required|numeric',
       'document_type_id' => 'required|numeric',
       'note' => 'nullable|min:2',
     ];
 
-    if (!$is_req) {
-      array_push($rules, ['is_active' => 'required|in:true,false,1,0']);
-    }
-
     $msgs = [];
 
     return Validator::make($data, $rules, $msgs);
   }
 
-  static public function getUiid($id) {
-    return 'LVD-' . str_pad($id, 4, '0', STR_PAD_LEFT);
-  }
-
-  static public function getItems($req) {
-    $items = LegacyVehicleDocument::
-      where('legacy_vehicle_id', $req->legacy_vehicle_id)->
-      where('is_active', boolval($req->is_active));
-
-    $items = $items->
-    get([
+  static public function getItems($req)
+  {
+    $items = LegacyVehicleDocument::query()
+      ->where('legacy_vehicle_id', $req->legacy_vehicle_id)
+      ->where('is_active', boolval($req->is_active))
+      ->get([
         'id',
-        'is_active',
         'document_type_id',
         'document_path',
         'note',
       ]);
 
-    foreach ($items as $key => $item) {
-      $item->key = $key;
+    foreach ($items as $item) {
       $item->document_type = DocumentType::find($item->document_type_id, ['name']);
-      $item->uiid = LegacyVehicleDocument::getUiid($item->id);
+      $item->document_b64 = DocMgrController::getB64($item->document_path, 'LegacyVehicleDocument');
+      $item->document_doc = null;
+      $item->document_dlt = false;
     }
 
     return $items;
   }
 
-  static public function getItem($req, $id) {
-    $item = LegacyVehicleDocument::
-      where('id', $id)->
-      find($id, [
-        'id',
-        'is_active',
-        'created_at',
-        'updated_at',
-        'created_by_id',
-        'updated_by_id',
-        'document_type_id',
-        'document_path',
-        'note',
-      ]);
-
-    if ($item) {
-      $item->created_by = User::find($item->created_by_id, ['email']);
-      $item->updated_by = User::find($item->updated_by_id, ['email']);
-      $item->document_type = DocumentType::find($item->document_type_id, ['name']);
-      $item->uiid = LegacyVehicleDocument::getUiid($item->id);
-    }
+  static public function getItem($req, $id)
+  {
+    $item = LegacyVehicleDocument::find($id);
+    $item->created_by = User::find($item->created_by_id, ['email']);
+    $item->updated_by = User::find($item->updated_by_id, ['email']);
+    $item->document_type = DocumentType::find($item->document_type_id, ['name']);
 
     return $item;
   }

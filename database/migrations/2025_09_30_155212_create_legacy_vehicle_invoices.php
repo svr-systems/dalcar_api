@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -18,8 +17,7 @@ return new class extends Migration
             $table->foreignId('created_by_id')->constrained('users');
             $table->foreignId('updated_by_id')->constrained('users');
             $table->foreignId('legacy_vehicle_id')->constrained('legacy_vehicles');
-            $table->foreignId('document_type_id')->constrained('document_types');
-            $table->string('document_path',50);
+            $table->string('document_path', 50);
             $table->string('note')->nullable();
         });
     }
