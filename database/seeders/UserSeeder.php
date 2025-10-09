@@ -6,13 +6,14 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
-class UserSeeder extends Seeder {
-  public function run() {
+class UserSeeder extends Seeder
+{
+  public function run()
+  {
     $now = Carbon::now()->format('Y-m-d H:i:s');
 
     $items = [
       [
-        'id' => 1,
         'created_at' => $now,
         'updated_at' => $now,
         'created_by_id' => null,

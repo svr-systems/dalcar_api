@@ -6,11 +6,13 @@ use App\Models\VehicleBrand;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class VehicleBrandsSeeder extends Seeder {
+class VehicleBrandsSeeder extends Seeder
+{
   /**
    * Run the database seeds.
    */
-  public function run(): void {
+  public function run(): void
+  {
     $items = [
       [
         'name' => 'TOYOTA'
@@ -41,7 +43,8 @@ class VehicleBrandsSeeder extends Seeder {
       ],
       [
         'name' => 'CHRYSLER'
-      ],[
+      ],
+      [
         'name' => 'VOLKSWAGEN'
       ],
       [
@@ -70,7 +73,8 @@ class VehicleBrandsSeeder extends Seeder {
       ],
       [
         'name' => 'JEEP'
-      ],[
+      ],
+      [
         'name' => 'TESLA'
       ],
       [

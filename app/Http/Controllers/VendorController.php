@@ -8,7 +8,7 @@ use DB;
 use Illuminate\Http\Request;
 use Throwable;
 
-class VendorCotroller extends Controller
+class VendorController extends Controller
 {
   public function index(Request $req)
   {

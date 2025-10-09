@@ -3,17 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Company;
+use App\Models\Branch;
 use Throwable;
 use DB;
 
-class CompanyContrller extends Controller {
+class BranchController extends Controller
+{
   public function index(Request $req) {
     try {
       return $this->apiRsp(
         200,
         'Registros retornados correctamente',
-        ['items' => Company::getItems($req)]
+        ['items' => Branch::getItems($req)]
       );
     } catch (Throwable $err) {
       return $this->apiRsp(500, null, $err);
@@ -25,7 +26,7 @@ class CompanyContrller extends Controller {
       return $this->apiRsp(
         200,
         'Registro retornado correctamente',
-        ['item' => Company::getItem($req, $id)]
+        ['item' => Branch::getItem($req, $id)]
       );
     } catch (Throwable $err) {
       return $this->apiRsp(500, null, $err);
@@ -35,7 +36,7 @@ class CompanyContrller extends Controller {
   public function destroy(Request $req, $id) {
     DB::beginTransaction();
     try {
-      $item = Company::find($id);
+      $item = Branch::find($id);
 
       if (!$item) {
         return $this->apiRsp(422, 'ID no existente');
@@ -69,7 +70,7 @@ class CompanyContrller extends Controller {
     DB::beginTransaction();
     try {
 
-      $valid = Company::valid($req->all());
+      $valid = Branch::valid($req->all());
 
       if ($valid->fails()) {
         return $this->apiRsp(422, $valid->errors()->first());
@@ -78,11 +79,11 @@ class CompanyContrller extends Controller {
       $store_mode = is_null($id);
 
       if ($store_mode) {
-        $item = new Company;
+        $item = new Branch;
         $item->created_by_id = $req->user()->id;
         $item->updated_by_id = $req->user()->id;
       } else {
-        $item = Company::find($id);
+        $item = Branch::find($id);
         $item->updated_by_id = $req->user()->id;
       }
 
@@ -105,13 +106,16 @@ class CompanyContrller extends Controller {
       $item->active = GenController::filter($data->active, 'b');
     }
 
+    $item->company_id = GenController::filter($data->company_id, 'id');
     $item->name = GenController::filter($data->name, 'U');
-    $item->logo_path = DocMgrController::save(
-      $data->logo_path,
-      DocMgrController::exist($data->logo_doc),
-      $data->logo_dlt,
-      'Company'
-    );
+    $item->street = GenController::filter($data->street, 'U');
+    $item->exterior_number = GenController::filter($data->exterior_number, 'U');
+    $item->interior_number = GenController::filter($data->interior_number, 'U');
+    $item->neighborhood = GenController::filter($data->neighborhood, 'U');
+    $item->zip = GenController::filter($data->zip, 'i');
+    $item->municipality_id = GenController::filter($data->municipality_id, 'id');
+    $item->email = GenController::filter($data->email, 'U');
+    $item->phone = GenController::filter($data->phone, 'U');
     $item->save();
 
     return $item;

@@ -6,11 +6,13 @@ use App\Models\Bank;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class BanksSeeder extends Seeder {
+class BanksSeeder extends Seeder
+{
   /**
    * Run the database seeds.
    */
-  public function run(): void {
+  public function run(): void
+  {
     $items = [
       [
         'name' => 'BBVA MÉXICO',
@@ -22,7 +24,7 @@ class BanksSeeder extends Seeder {
       ],
       [
         'name' => 'AMERICAN EXPRESS BANK (MÉXICO)',
-        'code' => 'NULL'
+        'code' => null
       ],
       [
         'name' => 'BANCA AFIRME',
@@ -51,7 +53,8 @@ class BanksSeeder extends Seeder {
       [
         'name' => 'BANCO BASE',
         'code' => '40145'
-      ], [
+      ],
+      [
         'name' => 'BANCO COVALTO',
         'code' => '40154'
       ],
@@ -61,11 +64,11 @@ class BanksSeeder extends Seeder {
       ],
       [
         'name' => 'BANCO CREDIT SUISSE (MÉXICO)',
-        'code' => 'NULL'
+        'code' => null
       ],
       [
         'name' => 'BANCO DE INVERSIÓN AFIRME',
-        'code' => 'NULL'
+        'code' => null
       ],
       [
         'name' => 'BANCO DEL BAJÍO',
@@ -73,7 +76,7 @@ class BanksSeeder extends Seeder {
       ],
       [
         'name' => 'BANCO FORJADORES',
-        'code' => 'NULL'
+        'code' => null
       ],
       [
         'name' => 'BANCO INBURSA',
@@ -90,7 +93,8 @@ class BanksSeeder extends Seeder {
       [
         'name' => 'BANCO JP MORGAN',
         'code' => '40111'
-      ], [
+      ],
+      [
         'name' => 'BANCO KEB HANA MÉXICO',
         'code' => '40146'
       ],
@@ -108,7 +112,7 @@ class BanksSeeder extends Seeder {
       ],
       [
         'name' => 'BANCO REGIONAL DE MONTERREY',
-        'code' => 'NULL'
+        'code' => null
       ],
       [
         'name' => 'BANCO S3 CACEIS MÉXICO',
@@ -129,7 +133,8 @@ class BanksSeeder extends Seeder {
       [
         'name' => 'BANCO VE POR MÁS',
         'code' => '40105'
-      ], [
+      ],
+      [
         'name' => 'BANCOPPEL',
         'code' => '40137'
       ],
@@ -168,13 +173,14 @@ class BanksSeeder extends Seeder {
       [
         'name' => 'CIBANCO',
         'code' => '40143'
-      ], [
+      ],
+      [
         'name' => 'CONSUBANCO',
         'code' => '40140'
       ],
       [
         'name' => 'DEUTSCHE BANK MÉXICO',
-        'code' => 'NULL'
+        'code' => null
       ],
       [
         'name' => 'FUNDACIÓN DONDÉ BANCO',

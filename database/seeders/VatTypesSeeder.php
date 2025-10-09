@@ -6,20 +6,19 @@ use App\Models\VatType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class VatTypesSeeder extends Seeder {
+class VatTypesSeeder extends Seeder
+{
   /**
    * Run the database seeds.
    */
-  public function run(): void {
+  public function run(): void
+  {
     $items = [
       [
-        'name' => 'TIPO 1',
+        'name' => 'UTILIDAD',
       ],
       [
-        'name' => 'TIPO 2',
-      ],
-      [
-        'name' => 'TIPO 3',
+        'name' => 'SIN IVA',
       ],
     ];
 

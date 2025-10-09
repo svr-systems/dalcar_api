@@ -5,8 +5,10 @@ namespace Database\Seeders;
 use App\Models\State;
 use Illuminate\Database\Seeder;
 
-class StateSeeder extends Seeder {
-  public function run() {
+class StateSeeder extends Seeder
+{
+  public function run()
+  {
     $items = [
       [
         'name' => 'AGUASCALIENTES',

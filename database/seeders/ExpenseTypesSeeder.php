@@ -8,11 +8,11 @@ use Illuminate\Database\Seeder;
 
 class ExpenseTypesSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
-    {
+  /**
+   * Run the database seeds.
+   */
+  public function run(): void
+  {
     $items = [
       [
         'name' => 'LLANTAS',
@@ -80,5 +80,5 @@ class ExpenseTypesSeeder extends Seeder
     ];
 
     ExpenseType::insert($items);
-    }
+  }
 }
