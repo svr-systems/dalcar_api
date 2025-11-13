@@ -41,55 +41,55 @@ Route::post('login', [AuthController::class, 'login']);
  * ===========================================
  */
 Route::group(['middleware' => 'auth:api'], function () {
-    Route::group(['prefix' => 'legacy_vehicles'], function () {
-        Route::apiResource('legacy_vehicle_invoices', LegacyVehicleInvoiceController::class);
-        Route::apiResource('legacy_vehicle_documents', LegacyVehicleDocumentController::class);
-        Route::apiResource('legacy_vehicle_expenses', LegacyVehicleExpenseController::class);
-        Route::apiResource('legacy_vehicle_investors', LegacyVehicleInvestorController::class);
-        Route::apiResource('legacy_vehicles_trades', LegacyVehicleTradeController::class);
-        Route::post('restore', [LegacyVehicleController::class, 'restore']);
-    });
-    Route::apiResource('legacy_vehicles', LegacyVehicleController::class);
+  Route::group(['prefix' => 'legacy_vehicles'], function () {
+    Route::apiResource('legacy_vehicle_invoices', LegacyVehicleInvoiceController::class);
+    Route::apiResource('legacy_vehicle_documents', LegacyVehicleDocumentController::class);
+    Route::apiResource('legacy_vehicle_expenses', LegacyVehicleExpenseController::class);
+    Route::apiResource('legacy_vehicle_investors', LegacyVehicleInvestorController::class);
+    Route::apiResource('legacy_vehicles_trades', LegacyVehicleTradeController::class);
+    Route::post('restore', [LegacyVehicleController::class, 'restore']);
+  });
+  Route::apiResource('legacy_vehicles', LegacyVehicleController::class);
 
-    Route::apiResource('investors', InvestorController::class);
+  Route::apiResource('investors', InvestorController::class);
 
-    /**
-     * Vendor
-     */
-    Route::group(['prefix' => 'vendors'], function () {
-        Route::post('restore', [VendorController::class, 'restore']);
-    });
-    Route::apiResource('vendors', VendorController::class);
+  /**
+   * Vendor
+   */
+  Route::group(['prefix' => 'vendors'], function () {
+    Route::post('restore', [VendorController::class, 'restore']);
+  });
+  Route::apiResource('vendors', VendorController::class);
 
-    Route::apiResource('companies/branches', BranchController::class);
+  Route::apiResource('companies/branches', BranchController::class);
 
-    Route::apiResource('companies', CompanyController::class);
+  Route::apiResource('companies', CompanyController::class);
 
-    Route::get('users/file/json', [UserController::class, 'getUserFile']);
-    Route::post('users/dni', [UserController::class, 'getDni']);
-    Route::apiResource('users', UserController::class);
+  Route::get('users/file/json', [UserController::class, 'getUserFile']);
+  Route::post('users/dni', [UserController::class, 'getDni']);
+  Route::apiResource('users', UserController::class);
 
-    /**
-     * Catalogs CRUD
-     */
-    Route::apiResource('expense_types', ExpenseTypeController::class);
-    Route::apiResource('document_types', DocumentTypeController::class);
-    Route::apiResource('custom_offices', CustomOfficeController::class);
-    Route::apiResource('vehicle_transmissions', VehicleTransmissionController::class);
-    Route::apiResource('vehicle_colors', VehicleColorController::class);
-    Route::apiResource('vehicle_versions', VehicleVersionController::class);
-    Route::apiResource('vehicle_models', VehicleModelController::class);
-    Route::apiResource('vehicle_brands', VehicleBrandController::class);
+  /**
+   * Catalogs CRUD
+   */
+  Route::apiResource('expense_types', ExpenseTypeController::class);
+  Route::apiResource('document_types', DocumentTypeController::class);
+  Route::apiResource('custom_offices', CustomOfficeController::class);
+  Route::apiResource('vehicle_transmissions', VehicleTransmissionController::class);
+  Route::apiResource('vehicle_colors', VehicleColorController::class);
+  Route::apiResource('vehicle_versions', VehicleVersionController::class);
+  Route::apiResource('vehicle_models', VehicleModelController::class);
+  Route::apiResource('vehicle_brands', VehicleBrandController::class);
 
-    /**
-     * Catalogs
-     */
-    Route::get('vat_types', [VatTypeController::class, 'index']);
-    Route::get('origin_types', [OriginTypeController::class, 'index']);
-    Route::get('banks', [BankController::class, 'index']);
-    Route::get('vendor_types', [VendorTypeController::class, 'index']);
-    Route::get('investor_types', [InvestorTypeController::class, 'index']);
-    Route::get('municipalities', [MunicipalityController::class, 'index']);
-    Route::get('states', [StateController::class, 'index']);
-    Route::get('roles', [RoleController::class, 'index']);
+  /**
+   * Catalogs
+   */
+  Route::get('vat_types', [VatTypeController::class, 'index']);
+  Route::get('origin_types', [OriginTypeController::class, 'index']);
+  Route::get('banks', [BankController::class, 'index']);
+  Route::get('vendor_types', [VendorTypeController::class, 'index']);
+  Route::get('investor_types', [InvestorTypeController::class, 'index']);
+  Route::get('municipalities', [MunicipalityController::class, 'index']);
+  Route::get('states', [StateController::class, 'index']);
+  Route::get('roles', [RoleController::class, 'index']);
 });

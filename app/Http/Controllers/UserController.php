@@ -9,8 +9,10 @@ use Throwable;
 use Storage;
 use DB;
 
-class UserController extends Controller {
-  public function index(Request $req) {
+class UserController extends Controller
+{
+  public function index(Request $req)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -22,7 +24,8 @@ class UserController extends Controller {
     }
   }
 
-  public function show(Request $req, $id) {
+  public function show(Request $req, $id)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -34,7 +37,8 @@ class UserController extends Controller {
     }
   }
 
-  public function destroy(Request $req, $id) {
+  public function destroy(Request $req, $id)
+  {
     DB::beginTransaction();
     try {
       $item = User::find($id);
@@ -59,15 +63,18 @@ class UserController extends Controller {
 
   }
 
-  public function store(Request $req) {
+  public function store(Request $req)
+  {
     return $this->storeUpdate($req, null);
   }
 
-  public function update(Request $req, $id) {
+  public function update(Request $req, $id)
+  {
     return $this->storeUpdate($req, $id);
   }
 
-  public function storeUpdate($req, $id) {
+  public function storeUpdate($req, $id)
+  {
     DB::beginTransaction();
     try {
       $email_current = null;
@@ -105,18 +112,18 @@ class UserController extends Controller {
         EmailController::userAccountConfirmation($item->email, $item);
       }
 
-      if ($req->user_branches) {
-        foreach ($req->user_branches as $user_branch) {
-          $user_branch_item = UserBranche::find($user_branch['id']);
-          if (!$user_branch_item) {
-            $user_branch_item = new UserBranche;
-          }
-          $user_branch_item->is_active = GenController::filter($user_branch['is_active'], 'b');
-          $user_branch_item->branch_id = GenController::filter($user_branch['branch_id'], 'id');
-          $user_branch_item->user_id = $item->id;
-          $user_branch_item->save();
-        }
-      }
+      // if ($req->user_branches) {
+      //   foreach ($req->user_branches as $user_branch) {
+      //     $user_branch_item = UserBranche::find($user_branch['id']);
+      //     if (!$user_branch_item) {
+      //       $user_branch_item = new UserBranche;
+      //     }
+      //     $user_branch_item->is_active = GenController::filter($user_branch['is_active'], 'b');
+      //     $user_branch_item->branch_id = GenController::filter($user_branch['branch_id'], 'id');
+      //     $user_branch_item->user_id = $item->id;
+      //     $user_branch_item->save();
+      //   }
+      // }
 
       DB::commit();
       return $this->apiRsp(
@@ -130,7 +137,8 @@ class UserController extends Controller {
     }
   }
 
-  public static function saveItem($item, $data, $is_req = true) {
+  public static function saveItem($item, $data, $is_req = true)
+  {
     if (!$is_req) {
       $item->active = GenController::filter($data->active, 'b');
     }
@@ -141,18 +149,23 @@ class UserController extends Controller {
     $item->email = GenController::filter($data->email, 'l');
     $item->role_id = GenController::filter($data->role_id, 'id');
     $item->phone = GenController::filter($data->phone, 'U');
-    $item->avatar_path = DocMgrController::save(
-      $data->avatar_path,
-      DocMgrController::exist($data->avatar_doc),
-      $data->avatar_dlt,
-      'User'
-    );
+
+    if (isset($data->avatar_doc)) {
+      $item->avatar_path = DocMgrController::save(
+        $data->avatar_path,
+        DocMgrController::exist($data->avatar_doc),
+        $data->avatar_dlt,
+        'User'
+      );
+    }
+
     $item->save();
 
     return $item;
   }
 
-  public function getDni(Request $req) {
+  public function getDni(Request $req)
+  {
     try {
       $image_controller = new ImageController;
       $img_b64 = $image_controller->UserDNI($req->user_id);
@@ -160,7 +173,7 @@ class UserController extends Controller {
         200,
         'Registros retornados correctamente',
         [
-          'img64'=> $img_b64['jpg64'],
+          'img64' => $img_b64['jpg64'],
           'ext' => '.jpg'
         ]
       );
@@ -168,7 +181,8 @@ class UserController extends Controller {
       return $this->apiRsp(500, null, $err);
     }
   }
-  public function getUserFile() {
+  public function getUserFile()
+  {
     try {
       $items = User::getUserFile();
       $file_name = time() . '.json';

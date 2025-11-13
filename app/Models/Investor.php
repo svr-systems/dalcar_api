@@ -8,11 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Validator;
 
-class Investor extends Model {
+class Investor extends Model
+{
   use HasFactory;
   public $timestamps = false;
 
-  public static function valid($data, $is_req = true) {
+  public static function valid($data, $is_req = true)
+  {
     $rules = [
       'user_id' => 'required|numeric',
       'investor_type_id' => 'required|numeric',
@@ -27,17 +29,19 @@ class Investor extends Model {
     return Validator::make($data, $rules, $msgs);
   }
 
-  static public function getUiid($id) {
+  static public function getUiid($id)
+  {
     return 'I-' . str_pad($id, 4, '0', STR_PAD_LEFT);
   }
 
-  static public function getItems($req) {
+  static public function getItems($req)
+  {
     $items = Investor::
       join('users', 'investors.user_id', 'users.id')->
       where('is_active', boolval($req->is_active));
 
     $items = $items->
-    get([
+      get([
         'investors.id',
         'users.is_active',
         'user_id',
@@ -55,9 +59,10 @@ class Investor extends Model {
     return $items;
   }
 
-  static public function getItem($req, $id) {
+  static public function getItem($req, $id)
+  {
     $item = Investor::
-    find($id, [
+      find($id, [
         'id',
         'user_id',
         'investor_type_id',
@@ -69,10 +74,11 @@ class Investor extends Model {
       $item->updated_by = User::find($item->updated_by_id, ['email']);
       $item->user = User::find($item->user_id);
       $item->investor_type = InvestorType::find($item->investor_type_id);
-      $item->investor_companies = InvestorCompany::where('investor_id',$item->id)->where('is_active',true)->get();
-      $item->user->avatar_b64 = DocMgrController::getB64($item->user->avatar_path, 'Users');
-      $item->user->avatar_doc = null;
-      $item->user->avatar_dlt = false;
+      $item->investor_companies = InvestorCompany::where('investor_id', $item->id)->where('is_active', true)->get();
+
+      foreach ($item->investor_companies as $investor_company) {
+        $investor_company->company = Company::find($investor_company->company_id, ['name']);
+      }
     }
 
     return $item;

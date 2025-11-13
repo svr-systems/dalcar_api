@@ -72,15 +72,18 @@ class InvestorController extends Controller
   public function storeUpdate($req, $id) {
     DB::beginTransaction();
     try {
-      $email_current = null;
-      $email = GenController::filter($req->email, 'l');
+      $user_data = json_decode(json_encode($req->user));
+      $user_data->role_id = 4;
 
-      $valid = User::validEmail(['email' => $email], $id);
+      $email_current = null;
+      $email = GenController::filter($user_data->email, 'l');
+
+      $valid = User::validEmail(['email' => $email], $user_data->id);
       if ($valid->fails()) {
         return $this->apiRsp(422, $valid->errors()->first());
       }
 
-      $valid = User::valid($req->all());
+      $valid = User::valid((array) $user_data);
       if ($valid->fails()) {
         return $this->apiRsp(422, $valid->errors()->first());
       }
@@ -101,7 +104,7 @@ class InvestorController extends Controller
         $user->updated_by_id = $req->user()->id;
       }
 
-      $user = UserController::saveItem($user, $req);
+      $user = UserController::saveItem($user, $user_data);
       $item->user_id = $user->id;
       $item->investor_type_id = $req->investor_type_id;
       $item->save();
