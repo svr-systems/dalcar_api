@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\LegacyVehicle;
-use App\Models\LegacyVehicleExpense;
-use App\Models\LegacyVehicleInvestor;
 use DB;
 use Illuminate\Http\Request;
 use Throwable;

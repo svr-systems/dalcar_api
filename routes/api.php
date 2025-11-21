@@ -17,6 +17,7 @@ use App\Http\Controllers\LegacyVehicleInvoiceController;
 use App\Http\Controllers\LegacyVehicleTradeController;
 use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\OriginTypeController;
+use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StateController;
 use App\Http\Controllers\UserController;
@@ -41,6 +42,11 @@ Route::post('login', [AuthController::class, 'login']);
  * ===========================================
  */
 Route::group(['middleware' => 'auth:api'], function () {
+  Route::group(['prefix' => 'purchase_orders'], function () {
+    Route::get('purchase_order_payments/{vendor_id}', [PurchaseOrderController::class, 'getPurchaseOrderPayments']);
+  });
+  Route::apiResource('purchase_orders', PurchaseOrderController::class);
+
   Route::group(['prefix' => 'legacy_vehicles'], function () {
     Route::apiResource('legacy_vehicle_invoices', LegacyVehicleInvoiceController::class);
     Route::apiResource('legacy_vehicle_documents', LegacyVehicleDocumentController::class);
