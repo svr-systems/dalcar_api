@@ -121,6 +121,9 @@ class VendorController extends Controller
     $item->name = GenController::filter($data->name, 'U');
     $item->vendor_type_id = GenController::filter($data->vendor_type_id, 'id');
     $item->payment_days = GenController::filter($data->payment_days, 'i');
+    $item->uses_payment_link = GenController::filter($data->uses_payment_link, 'b');
+    $item->requires_reference = GenController::filter($data->requires_reference, 'b');
+    $item->requires_statement = GenController::filter($data->requires_statement, 'b');
     $item->save();
 
     $vendor_banks = json_decode(json_encode($data->vendor_banks));
@@ -140,5 +143,18 @@ class VendorController extends Controller
     }
 
     return $item;
+  }
+
+  public function getItemToPurchaseOrder(Request $req)
+  {
+    try {
+      return $this->apiRsp(
+        200,
+        'Registros retornado correctamente',
+        ['item' => Vendor::getItemToPurchaseOrder($req)]
+      );
+    } catch (Throwable $err) {
+      return $this->apiRsp(500, null, $err);
+    }
   }
 }

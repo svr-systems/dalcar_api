@@ -95,6 +95,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'PurchaseOrder' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/PurchaseOrder'),
+            'url' => env('APP_URL') . '/storage',
+            'visibility' => 'public',
+        ],
+
         'temp' => [
             'driver' => 'local',
             'root' => storage_path('app/private/temp'),

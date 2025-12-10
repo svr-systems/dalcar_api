@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\DocMgrController;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use DateTimeInterface;
@@ -18,30 +19,22 @@ class PurchaseOrder extends Model
     'updated_at' => 'datetime:Y-m-d H:i:s',
   ];
 
-  // public static function valid($data, $id)
-  // {
-  //   $rules = [
-  //     // 'branch_id' => 'required|numeric',
-  //     // 'purchase_date' => 'required|date',
-  //     // 'vehicle_version_id' => 'required|numeric',
-  //     // 'vehicle_color_id' => 'required|numeric',
-  //     // 'vehicle_transmission_id' => 'required|numeric',
-  //     // 'vin' => 'required|min:2|max:17|unique:legacy_vehicles,vin,' . $id,
-  //     // 'engine_number' => 'nullable|min:2|max:30',
-  //     // 'repuve' => 'nullable|min:2|max:25',
-  //     // 'vehicle_key' => 'nullable|min:2|max:20',
-  //     // 'notes' => 'nullable',
-  //     // 'origin_type_id' => 'required|numeric',
-  //     // 'pediment_number' => 'nullable|min:2|max:30',
-  //     // 'pediment_date' => 'nullable|date',
-  //     // 'custom_office_id' => 'nullable|numeric',
-  //     // 'pediment_notes' => 'nullable',
-  //   ];
+  public static function valid($data)
+  {
+    $rules = [
+      'branch_id' => 'required|numeric',
+      'order_date' => 'required|date',
+      'total_amount' => 'required|numeric',
+      'vendor_id' => 'required|numeric',
+      'due_date' => 'required|date',
+      'reference' => 'nullable|min:2|max:40',
+      'note' => 'nullable',
+    ];
 
-  //   $msgs = ['vin.unique' => 'El VIN ya ha sido registrado'];
+    $msgs = [];
 
-  //   return Validator::make($data, $rules, $msgs);
-  // }
+    return Validator::make($data, $rules, $msgs);
+  }
 
   static public function getUiid($id)
   {
@@ -56,9 +49,8 @@ class PurchaseOrder extends Model
       ->get([
         'id',
         'is_active',
-        'created_at',
-        'vendor_id',
         'order_date',
+        'vendor_id',
         'due_date',
         'total_amount',
         'paid_at',
@@ -66,56 +58,51 @@ class PurchaseOrder extends Model
 
     foreach ($items as $key => $item) {
       $item->key = $key;
-      $item->uiid = LegacyVehicle::getUiid($item->id);
-      // $item->vehicle_version = VehicleVersion::find($item->vehicle_version_id, ['name', 'vehicle_model_id', 'model_year']);
-      // $item->vehicle_version->vehicle_model = VehicleModel::find($item->vehicle_version->vehicle_model_id, ['name', 'vehicle_brand_id']);
-      // $item->vehicle_version->vehicle_model->vehicle_brand = VehicleBrand::find($item->vehicle_version->vehicle_model->vehicle_brand_id, ['name']);
-      // $item->vehicle_color = VehicleColor::find($item->vehicle_color_id, ['name']);
+      $item->uiid = self::getUiid($item->id);
+      $item->vendor = Vendor::find($item->vendor_id, ['name']);
+
+      $item->days_remaining = null;
+      if (!$item->paid_at) {
+        $due_date = Carbon::parse($item->due_date)->startOfDay();
+        $item->days_remaining = Carbon::today()->diffInDays($due_date, false);
+      }
     }
 
     return $items;
   }
 
-  // static public function getItem($id)
-  // {
-  //   $item = LegacyVehicle::find($id);
-  //   $item->uiid = LegacyVehicle::getUiid($item->id);
-  //   $item->created_by = User::find($item->created_by_id, ['email']);
-  //   $item->updated_by = User::find($item->updated_by_id, ['email']);
-  //   $item->branch = Branch::find($item->branch_id, ['name']);
-  //   $item->vehicle_version = VehicleVersion::find($item->vehicle_version_id, ['name', 'vehicle_model_id', 'model_year']);
-  //   $item->vehicle_version->vehicle_model = VehicleModel::find($item->vehicle_version->vehicle_model_id, ['name', 'vehicle_brand_id']);
-  //   $item->vehicle_version->vehicle_model->vehicle_brand = VehicleBrand::find($item->vehicle_version->vehicle_model->vehicle_brand_id, ['name']);
-  //   $item->vehicle_color = VehicleColor::find($item->vehicle_color_id, ['name']);
-  //   $item->vehicle_transmission = VehicleTransmission::find($item->vehicle_transmission_id, ['name']);
-  //   $item->origin_type = OriginType::find($item->origin_type_id, ['name']);
-  //   $item->custom_office = CustomOffice::find($item->custom_office_id, ['name']);
-
-  //   return $item;
-  // }
-
-  static public function getPurchaseOrderPayments($req, $vendor_id)
+  static public function getItem($id)
   {
-    $vendor_banks = VendorBank::query()
-      ->where('vendor_id', $vendor_id)
-      ->where('is_active', 1)
-      ->get();
+    $item = self::find($id);
+    $item->uiid = self::getUiid($item->id);
+    $item->created_by = User::find($item->created_by_id, ['email']);
+    $item->updated_by = User::find($item->updated_by_id, ['email']);
+    $item->branch = Branch::find($item->branch_id, ['name']);
+    $item->vendor = Vendor::find($item->vendor_id, ['name']);
+    $item->statement_b64 = DocMgrController::getB64($item->statement_path, 'PurchaseOrder');
 
-    $items = [];
-
-    foreach ($vendor_banks as $vendor_bank) {
-      $items[] = [
-        'id' => null,
-        'is_active' => 1,
-        'bank_id' => $vendor_bank->bank_id,
-        'account_holder' => $vendor_bank->account_holder,
-        'clabe_number' => $vendor_bank->clabe_number,
-        'account_number' => $vendor_bank->account_number,
-        'amount' => null,
-        'bank' => Bank::find($vendor_bank->bank_id, ['name'])
-      ];
+    $item->days_remaining = null;
+    if (!$item->paid_at) {
+      $due_date = Carbon::parse($item->due_date)->startOfDay();
+      $item->days_remaining = Carbon::today()->diffInDays($due_date, false);
     }
 
-    return $items;
+    $item->purchase_order_payments = PurchaseOrderPayment::query()
+      ->where('purchase_order_id', $item->id)
+      ->where('is_active', 1)
+      ->get([
+        'id',
+        'bank_id',
+        'account_holder',
+        'clabe_number',
+        'account_number',
+        'amount',
+      ]);
+
+    foreach ($item->purchase_order_payments as $purchase_order_payment) {
+      $purchase_order_payment->bank = Bank::find($purchase_order_payment->bank_id, 'name');
+    }
+
+    return $item;
   }
 }

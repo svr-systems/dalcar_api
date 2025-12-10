@@ -43,7 +43,7 @@ Route::post('login', [AuthController::class, 'login']);
  */
 Route::group(['middleware' => 'auth:api'], function () {
   Route::group(['prefix' => 'purchase_orders'], function () {
-    Route::get('purchase_order_payments/{vendor_id}', [PurchaseOrderController::class, 'getPurchaseOrderPayments']);
+    Route::get('vendor', [VendorController::class, 'getItemToPurchaseOrder']);
   });
   Route::apiResource('purchase_orders', PurchaseOrderController::class);
 
