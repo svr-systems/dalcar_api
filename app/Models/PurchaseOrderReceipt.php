@@ -22,7 +22,8 @@ class PurchaseOrderReceipt extends Model
 
   static public function getItems($request, $purchase_order_id)
   {
-    $purchase_order = PurchaseOrder::find($purchase_order_id, ['id', 'is_active', 'paid_at']);
+    $purchase_order = PurchaseOrder::find($purchase_order_id, ['id', 'is_active', 'total_amount', 'paid_at']);
+
     $purchase_order->purchase_order_payments = PurchaseOrderPayment::query()
       ->where('purchase_order_id', $purchase_order->id)
       ->where('is_active', 1)

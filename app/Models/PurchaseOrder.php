@@ -127,51 +127,21 @@ class PurchaseOrder extends Model
       }
     }
 
-    $item->purchase_order_receipts = PurchaseOrderReceipt::query()
+    $purchase_order_vehicles = PurchaseOrderVehicle::query()
       ->where('purchase_order_id', $item->id)
       ->where('is_active', 1)
       ->get([
         'id',
-        'note',
-        'file_path',
-      ]);
-
-    foreach ($item->purchase_order_receipts as $purchase_order_receipt) {
-      $purchase_order_receipt->file_b64 = DocMgrController::getB64($purchase_order_receipt->file_path, 'PurchaseOrderReceipt');
-    }
-
-    $item->purchase_order_vehicles = PurchaseOrderVehicle::query()
-      ->where('purchase_order_id', $item->id)
-      ->where('is_active', 1)
-      ->get([
-        'id',
-        'vehicle_id',
-        'invoice_amount',
-        'commission_amount',
         'purchase_price',
       ]);
 
     $item->purchase_order_vehicles_amount = 0;
 
-    foreach ($item->purchase_order_vehicles as $purchase_order_vehicle) {
-      $vehicle = Vehicle::find($purchase_order_vehicle->vehicle_id, [
-        'id',
-        'vehicle_version_id',
-        'vehicle_color_id',
-        'vin',
-      ]);
-
-      $vehicle->vehicle_version = VehicleVersion::find($vehicle->vehicle_version_id, ['name', 'vehicle_model_id', 'model_year']);
-      $vehicle->vehicle_version->vehicle_model = VehicleModel::find($vehicle->vehicle_version->vehicle_model_id, ['name', 'vehicle_brand_id']);
-      $vehicle->vehicle_version->vehicle_model->vehicle_brand = VehicleBrand::find($vehicle->vehicle_version->vehicle_model->vehicle_brand_id, ['name']);
-      $vehicle->vehicle_color = VehicleColor::find($vehicle->vehicle_color_id, ['name']);
-
-      $purchase_order_vehicle->vehicle = $vehicle;
-
+    foreach ($purchase_order_vehicles as $purchase_order_vehicle) {
       $item->purchase_order_vehicles_amount += (float) $purchase_order_vehicle->purchase_price;
     }
 
-    $item->total_amount_pending = $item->total_amount != $item->purchase_order_vehicles_amount;
+    $item->total_amount_pending = (float) $item->total_amount != $item->purchase_order_vehicles_amount;
 
     return $item;
   }

@@ -45,22 +45,15 @@ Route::post('login', [AuthController::class, 'login']);
  * ===========================================
  */
 Route::group(['middleware' => 'auth:api'], function () {
-  Route::group(['prefix' => 'purchase_order_payments'], function () {
-    Route::post('receipt', [PurchaseOrderPaymentController::class, 'receipt']);
-  });
-
-  Route::group(['prefix' => 'purchase_order_vehicles'], function () {
-    Route::post('{id}/restore', [PurchaseOrderVehicleController::class, 'restore']);
-  });
-  Route::apiResource('purchase_order_vehicles', PurchaseOrderVehicleController::class);
-
-  Route::apiResource('purchase_order_receipts', PurchaseOrderReceiptController::class);
-
   Route::group(['prefix' => 'purchase_orders'], function () {
-    Route::group(['prefix' => 'purchase_order_receipts'], function () {
-      Route::post('', [PurchaseOrderReceiptController::class, 'store']);
-      Route::get('{purchase_order_id}', [PurchaseOrderReceiptController::class, 'index']);
-    });
+    Route::post('purchase_order_receipts', [PurchaseOrderReceiptController::class, 'store']);
+    Route::get('{purchase_order_id}/purchase_order_receipts', [PurchaseOrderReceiptController::class, 'index']);
+
+    Route::delete('purchase_order_vehicles/{id}', [PurchaseOrderVehicleController::class, 'destroy']);
+    Route::patch('purchase_order_vehicles/{id}', [PurchaseOrderVehicleController::class, 'update']);
+    Route::get('purchase_order_vehicles/{id}', [PurchaseOrderVehicleController::class, 'show']);
+    Route::post('purchase_order_vehicles', [PurchaseOrderVehicleController::class, 'store']);
+    Route::get('{purchase_order_id}/purchase_order_vehicles', [PurchaseOrderVehicleController::class, 'index']);
 
     Route::get('vendor', [VendorController::class, 'getItemToPurchaseOrder']);
 

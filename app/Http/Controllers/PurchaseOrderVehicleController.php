@@ -11,13 +11,13 @@ use Throwable;
 
 class PurchaseOrderVehicleController extends Controller
 {
-  public function index(Request $req)
+  public function index(Request $request, $purchase_order_id)
   {
     try {
       return $this->apiRsp(
         200,
         'Registros retornados correctamente',
-        ['items' => PurchaseOrderVehicle::getItems($req)]
+        PurchaseOrderVehicle::getItems($request, $purchase_order_id)
       );
     } catch (Throwable $err) {
       return $this->apiRsp(500, null, $err);
@@ -37,43 +37,25 @@ class PurchaseOrderVehicleController extends Controller
     }
   }
 
-  public function destroy(Request $req, $id)
+  public function destroy(Request $request, $id)
   {
     DB::beginTransaction();
+
     try {
       $item = PurchaseOrderVehicle::find($id);
       $item->is_active = 0;
-      $item->updated_by_id = $req->user()->id;
+      $item->updated_by_id = $request->user()->id;
       $item->save();
 
       DB::commit();
+
       return $this->apiRsp(
         200,
-        'Registro inactivado correctamente'
+        'Auto eliminado correctamente'
       );
     } catch (Throwable $err) {
       DB::rollback();
-      return $this->apiRsp(500, null, $err);
-    }
 
-  }
-
-  public function restore(Request $req, $id)
-  {
-    DB::beginTransaction();
-    try {
-      $item = PurchaseOrderVehicle::find($id);
-      $item->is_active = 1;
-      $item->updated_by_id = $req->user()->id;
-      $item->save();
-
-      DB::commit();
-      return $this->apiRsp(
-        200,
-        'Registro activado correctamente'
-      );
-    } catch (Throwable $err) {
-      DB::rollback();
       return $this->apiRsp(500, null, $err);
     }
 

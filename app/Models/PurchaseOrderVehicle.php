@@ -33,10 +33,12 @@ class PurchaseOrderVehicle extends Model
     return Validator::make($data, $rules, $msgs);
   }
 
-  static public function getItems($req)
+  static public function getItems($request, $purchase_order_id)
   {
+    $purchase_order = PurchaseOrder::find($purchase_order_id, ['id', 'is_active', 'paid_at']);
+
     $items = self::query()
-      ->where('purchase_order_id', $req->purchase_order_id)
+      ->where('purchase_order_id', $purchase_order->id)
       ->where('is_active', 1)
       ->get([
         'id',
@@ -62,7 +64,10 @@ class PurchaseOrderVehicle extends Model
       $item->vehicle->vehicle_color = VehicleColor::find($item->vehicle->vehicle_color_id, ['name']);
     }
 
-    return $items;
+    return [
+      'items' => $items,
+      'purchase_order' => $purchase_order,
+    ];
   }
 
   static public function getItem($id)
