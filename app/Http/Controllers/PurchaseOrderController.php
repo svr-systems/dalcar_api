@@ -3,19 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderPayment;
 use DB;
 use Illuminate\Http\Request;
 use Throwable;
 
 class PurchaseOrderController extends Controller
 {
-  public function index(Request $req)
+  public function index(Request $request)
   {
     try {
       return $this->apiRsp(
         200,
         'Registros retornados correctamente',
-        ['items' => PurchaseOrder::getItems($req)]
+        ['items' => PurchaseOrder::getItems($request)]
       );
     } catch (Throwable $err) {
       return $this->apiRsp(500, null, $err);
@@ -35,56 +36,46 @@ class PurchaseOrderController extends Controller
     }
   }
 
-  // public function destroy(Request $req, $id)
-  // {
-  //   DB::beginTransaction();
-  //   try {
-  //     $item = PurchaseOrder::find($id);
+  public function destroy(Request $req, $id)
+  {
+    DB::beginTransaction();
+    try {
+      $item = PurchaseOrder::find($id);
+      $item->is_active = 0;
+      $item->updated_by_id = $req->user()->id;
+      $item->save();
 
-  //     if (!$item) {
-  //       return $this->apiRsp(422, 'ID no existente');
-  //     }
+      DB::commit();
+      return $this->apiRsp(
+        200,
+        'Registro eliminado correctamente'
+      );
+    } catch (Throwable $err) {
+      DB::rollback();
+      return $this->apiRsp(500, null, $err);
+    }
+  }
 
-  //     $item->is_active = 0;
-  //     $item->updated_by_id = $req->user()->id;
-  //     $item->save();
+  public function restore(Request $req)
+  {
+    DB::beginTransaction();
+    try {
+      $item = PurchaseOrder::find($req->id);
+      $item->is_active = 1;
+      $item->updated_by_id = $req->user()->id;
+      $item->save();
 
-  //     DB::commit();
-  //     return $this->apiRsp(
-  //       200,
-  //       'Registro inactivado correctamente'
-  //     );
-  //   } catch (Throwable $err) {
-  //     DB::rollback();
-  //     return $this->apiRsp(500, null, $err);
-  //   }
-  // }
-
-  // public function restore(Request $req)
-  // {
-  //   DB::beginTransaction();
-  //   try {
-  //     $item = PurchaseOrder::find($req->id);
-
-  //     if (!$item) {
-  //       return $this->apiRsp(422, 'ID no existente');
-  //     }
-
-  //     $item->is_active = 1;
-  //     $item->updated_by_id = $req->user()->id;
-  //     $item->save();
-
-  //     DB::commit();
-  //     return $this->apiRsp(
-  //       200,
-  //       'Registro activado correctamente',
-  //       ['item' => PurchaseOrder::getItem($item->id)]
-  //     );
-  //   } catch (Throwable $err) {
-  //     DB::rollback();
-  //     return $this->apiRsp(500, null, $err);
-  //   }
-  // }
+      DB::commit();
+      return $this->apiRsp(
+        200,
+        'Registro activado correctamente',
+        ['item' => PurchaseOrder::getItem($item->id)]
+      );
+    } catch (Throwable $err) {
+      DB::rollback();
+      return $this->apiRsp(500, null, $err);
+    }
+  }
 
   public function store(Request $req)
   {
@@ -134,8 +125,11 @@ class PurchaseOrderController extends Controller
   public static function saveItem($item, $data)
   {
     $item->branch_id = GenController::filter($data->branch_id, 'id');
-    $item->order_date = GenController::filter($data->order_date, 'd');
+    $item->subtotal_amount = GenController::filter($data->subtotal_amount, 'f');
+    $item->commission_amount = GenController::filter($data->commission_amount, 'f');
+    $item->warranty_amount = GenController::filter($data->warranty_amount, 'f');
     $item->total_amount = GenController::filter($data->total_amount, 'f');
+    $item->order_date = GenController::filter($data->order_date, 'd');
     $item->vendor_id = GenController::filter($data->vendor_id, 'id');
     $item->due_date = GenController::filter($data->due_date, 'd');
     $item->reference = is_null($data->reference) ? null : trim($data->reference);
@@ -147,6 +141,26 @@ class PurchaseOrderController extends Controller
     );
     $item->note = GenController::filter($data->note, 'U');
     $item->save();
+
+    $purchase_order_payments = json_decode($data->purchase_order_payments);
+    foreach ($purchase_order_payments as $purchase_order_payment) {
+      $purchase_order_payment_item = PurchaseOrderPayment::find($purchase_order_payment->id);
+      if (!$purchase_order_payment_item) {
+        $purchase_order_payment_item = new PurchaseOrderPayment;
+        $purchase_order_payment_item->created_by_id = $data->user()->id;
+        $purchase_order_payment_item->purchase_order_id = $item->id;
+      }
+
+      $purchase_order_payment_item->updated_by_id = $data->user()->id;
+      $purchase_order_payment_item->bank_id = $purchase_order_payment->bank_id;
+      $purchase_order_payment_item->account_holder = $purchase_order_payment->account_holder;
+      $purchase_order_payment_item->clabe_number = $purchase_order_payment->clabe_number;
+      $purchase_order_payment_item->account_number = $purchase_order_payment->account_number;
+      $purchase_order_payment_item->cie_code = $purchase_order_payment->cie_code;
+      $purchase_order_payment_item->is_commission = GenController::filter($purchase_order_payment->is_commission, 'b');
+      $purchase_order_payment_item->amount = GenController::filter($purchase_order_payment->amount, 'f');
+      $purchase_order_payment_item->save();
+    }
 
     return $item;
   }

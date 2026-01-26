@@ -17,7 +17,6 @@ return new class extends Migration {
 
       $table->foreignId('branch_id')->constrained('branches');
 
-      $table->foreignId('vehicle_model_id')->constrained('vehicle_models');
       $table->foreignId('vehicle_version_id')->constrained('vehicle_versions');
       $table->foreignId('vehicle_transmission_id')->constrained('vehicle_transmissions');
       $table->foreignId('vehicle_color_id')->constrained('vehicle_colors');

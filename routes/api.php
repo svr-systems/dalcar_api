@@ -18,6 +18,9 @@ use App\Http\Controllers\LegacyVehicleTradeController;
 use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\OriginTypeController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\PurchaseOrderPaymentController;
+use App\Http\Controllers\PurchaseOrderReceiptController;
+use App\Http\Controllers\PurchaseOrderVehicleController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StateController;
 use App\Http\Controllers\UserController;
@@ -42,8 +45,26 @@ Route::post('login', [AuthController::class, 'login']);
  * ===========================================
  */
 Route::group(['middleware' => 'auth:api'], function () {
+  Route::group(['prefix' => 'purchase_order_payments'], function () {
+    Route::post('receipt', [PurchaseOrderPaymentController::class, 'receipt']);
+  });
+
+  Route::group(['prefix' => 'purchase_order_vehicles'], function () {
+    Route::post('{id}/restore', [PurchaseOrderVehicleController::class, 'restore']);
+  });
+  Route::apiResource('purchase_order_vehicles', PurchaseOrderVehicleController::class);
+
+  Route::apiResource('purchase_order_receipts', PurchaseOrderReceiptController::class);
+
   Route::group(['prefix' => 'purchase_orders'], function () {
+    Route::group(['prefix' => 'purchase_order_receipts'], function () {
+      Route::post('', [PurchaseOrderReceiptController::class, 'store']);
+      Route::get('{purchase_order_id}', [PurchaseOrderReceiptController::class, 'index']);
+    });
+
     Route::get('vendor', [VendorController::class, 'getItemToPurchaseOrder']);
+
+    Route::post('restore', [PurchaseOrderController::class, 'restore']);
   });
   Route::apiResource('purchase_orders', PurchaseOrderController::class);
 

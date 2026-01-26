@@ -16,15 +16,15 @@ return new class extends Migration {
       $table->foreignId('updated_by_id')->constrained('users');
 
       $table->foreignId('purchase_order_id')->constrained('purchase_orders');
+      
       $table->foreignId('bank_id')->constrained('banks');
-
       $table->string('account_holder', 100);
       $table->string('clabe_number', 18);
       $table->string('account_number', 20);
+      $table->string('cie_code', 20)->nullable();
+      $table->boolean('is_commission');
 
       $table->decimal('amount', 12, 2);
-
-      $table->string('receipt_path', 50)->nullable();
     });
   }
 

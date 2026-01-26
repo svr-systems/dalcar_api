@@ -82,8 +82,8 @@ class GenController extends Controller
   {
     return trim(
       $data->name . ' ' .
-        $data->paternal_surname . ' ' .
-        trim($data->maternal_surname) . ' '
+      $data->paternal_surname . ' ' .
+      trim($data->maternal_surname) . ' '
     );
   }
 
@@ -99,5 +99,39 @@ class GenController extends Controller
       array_push($new_array, $item);
     }
     return $new_array;
+  }
+
+  public static function toAmountFormat($value, $separator = ',', $decimals = 2): ?string
+  {
+    if (empty($value))
+      return null;
+
+    return '$' . number_format((float) $value, $decimals, '.', $separator);
+  }
+
+  public static function removeSpaces(?string $value): ?string
+  {
+    if (empty($value))
+      return null;
+
+    return preg_replace('/\s+/', '', $value);
+  }
+
+  public static function docToB64Object(?string $folder, ?string $filename): ?object
+  {
+    if (!$folder || !$filename)
+      return null;
+
+    $folder = trim($folder, "/\\");
+    $filename = ltrim($filename, "/\\");
+
+    $path = storage_path("app/private/{$folder}/{$filename}");
+    if (!is_file($path))
+      return null;
+
+    return (object) [
+      'cnt' => base64_encode(file_get_contents($path)),
+      'ext' => strtolower(pathinfo($path, PATHINFO_EXTENSION)),
+    ];
   }
 }

@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\DocMgrController;
-use App\Http\Controllers\GenController;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;

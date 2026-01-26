@@ -82,7 +82,7 @@ class VendorController extends Controller
     return $this->storeUpdate($req, $id);
   }
 
-  public function storeUpdate($req, int $id)
+  public function storeUpdate($req, $id)
   {
     DB::beginTransaction();
     try {
@@ -138,6 +138,8 @@ class VendorController extends Controller
       $vendor_bank_item->account_holder = GenController::filter($vendor_bank->account_holder, 'U');
       $vendor_bank_item->clabe_number = GenController::filter($vendor_bank->clabe_number, 'U');
       $vendor_bank_item->account_number = GenController::filter($vendor_bank->account_number, 'U');
+      $vendor_bank_item->cie_code = GenController::filter($vendor_bank->cie_code, 'U');
+      $vendor_bank_item->is_commission = GenController::filter($vendor_bank->is_commission, 'b');
       $vendor_bank_item->vendor_id = $item->id;
       $vendor_bank_item->save();
     }
