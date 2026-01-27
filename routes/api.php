@@ -27,6 +27,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VatTypeController;
 use App\Http\Controllers\VehicleBrandController;
 use App\Http\Controllers\VehicleColorController;
+use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\VehicleInvestorController;
 use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\VehicleTransmissionController;
 use App\Http\Controllers\VehicleVersionController;
@@ -45,6 +47,15 @@ Route::post('login', [AuthController::class, 'login']);
  * ===========================================
  */
 Route::group(['middleware' => 'auth:api'], function () {
+  Route::group(['prefix' => 'vehicles'], function () {
+    Route::delete('vehicle_investors/{id}', [VehicleInvestorController::class, 'destroy']);
+    Route::patch('vehicle_investors/{id}', [VehicleInvestorController::class, 'update']);
+    Route::get('vehicle_investors/{id}', [VehicleInvestorController::class, 'show']);
+    Route::post('vehicle_investors', [VehicleInvestorController::class, 'store']);
+    Route::get('{vehicle_id}/vehicle_investors', [VehicleInvestorController::class, 'index']);
+  });
+  Route::apiResource('vehicles', VehicleController::class);
+
   Route::group(['prefix' => 'purchase_orders'], function () {
     Route::post('purchase_order_receipts', [PurchaseOrderReceiptController::class, 'store']);
     Route::get('{purchase_order_id}/purchase_order_receipts', [PurchaseOrderReceiptController::class, 'index']);
