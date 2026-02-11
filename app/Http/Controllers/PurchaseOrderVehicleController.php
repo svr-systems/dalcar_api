@@ -86,7 +86,7 @@ class PurchaseOrderVehicleController extends Controller
         return $this->apiRsp(422, $valid->errors()->first());
       }
 
-      $purchase_order = PurchaseOrder::find($req->purchase_order_id, ['id', 'total_amount']);
+      $purchase_order = PurchaseOrder::find($req->purchase_order_id, ['id', 'total_amount', 'warranty_amount']);
 
       $sum = PurchaseOrderVehicle::query()
         ->where('purchase_order_id', $purchase_order->id)
@@ -96,7 +96,7 @@ class PurchaseOrderVehicleController extends Controller
 
       $sum = (float) $sum + GenController::filter($req->purchase_price, 'f');
 
-      if ($sum > (float) $purchase_order->total_amount) {
+      if ($sum > ((float) $purchase_order->total_amount + (float) $purchase_order->warranty_amount)) {
         return $this->apiRsp(
           422,
           'La sumatoria del total de precio de compra de los vehiculos ('

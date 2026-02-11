@@ -41,12 +41,12 @@ class Vendor extends Model
     $items = Vendor::query()
       ->where('is_active', boolval($req->is_active))
       ->get([
-          'id',
-          'is_active',
-          'name',
-          'vendor_type_id',
-          'payment_days',
-        ]);
+        'id',
+        'is_active',
+        'name',
+        'vendor_type_id',
+        'payment_days',
+      ]);
 
     foreach ($items as $key => $item) {
       $item->key = $key;
@@ -79,7 +79,7 @@ class Vendor extends Model
     return $item;
   }
 
-  static public function getItemToPurchaseOrder($req)
+  public static function getItemToPurchaseOrder($req): array
   {
     $vendor_id = (int) $req->id;
 
@@ -91,6 +91,15 @@ class Vendor extends Model
       'requires_statement',
     ]);
 
+    if (!$vendor) {
+      return [
+        'error' => 'Proveedor no encontrado.',
+        'vendor' => null,
+        'purchase_order_payments' => [],
+        'due_date' => null,
+      ];
+    }
+
     $due_date = Carbon::createFromFormat('Y-m-d', (string) $req->order_date)
       ->addWeekdays((int) $vendor->payment_days)
       ->toDateString();
@@ -99,13 +108,25 @@ class Vendor extends Model
       ->where('vendor_id', $vendor_id)
       ->where('is_active', 1)
       ->get([
-          'bank_id',
-          'account_holder',
-          'clabe_number',
-          'account_number',
-          'cie_code',
-          'is_commission',
-        ]);
+        'bank_id',
+        'account_holder',
+        'clabe_number',
+        'account_number',
+        'cie_code',
+        'is_commission',
+      ]);
+
+    $for_commission = $vendor_banks->where('is_commission', 1)->count();
+    $for_payment = $vendor_banks->where('is_commission', 0)->count();
+
+    if ($for_payment <= 0) {
+      return [
+        'error' => 'El proveedor no tiene cuentas bancarias de pago activas.',
+        'vendor' => $vendor,
+        'purchase_order_payments' => [],
+        'due_date' => $due_date,
+      ];
+    }
 
     $bank_ids = $vendor_banks->pluck('bank_id')->unique()->values();
 
@@ -114,29 +135,20 @@ class Vendor extends Model
       ->get(['id', 'name'])
       ->keyBy('id');
 
-    $for_commission = $vendor_banks->where('is_commission', 1)->count();
-    $for_payment = $vendor_banks->where('is_commission', 0)->count();
-
-    $commission_amount = (float) $req->commission_amount;
     $subtotal_amount = (float) $req->subtotal_amount;
+    $commission_amount = (float) $req->commission_amount;
     $warranty_amount = (float) $req->warranty_amount;
 
-    $net_amount = $subtotal_amount - $warranty_amount;
+    $net_amount = $subtotal_amount - $warranty_amount + ($for_commission === 0 ? $commission_amount : 0.0);
 
     $purchase_order_payments = [];
 
     foreach ($vendor_banks as $vendor_bank) {
       $is_commission = (bool) $vendor_bank->is_commission;
 
-      if ($is_commission) {
-        $amount = $for_commission > 0
-          ? ($commission_amount / $for_commission)
-          : 0.0;
-      } else {
-        $amount = $for_payment > 0
-          ? ($net_amount / $for_payment)
-          : 0.0;
-      }
+      $amount = $is_commission
+        ? ($for_commission > 0 ? ($commission_amount / $for_commission) : 0.0)
+        : ($net_amount / $for_payment);
 
       $purchase_order_payments[] = [
         'id' => null,
@@ -153,6 +165,7 @@ class Vendor extends Model
     }
 
     return [
+      'error' => null,
       'vendor' => $vendor,
       'purchase_order_payments' => $purchase_order_payments,
       'due_date' => $due_date,

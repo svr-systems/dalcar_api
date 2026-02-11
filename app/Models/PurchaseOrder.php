@@ -141,7 +141,7 @@ class PurchaseOrder extends Model
       $item->purchase_order_vehicles_amount += (float) $purchase_order_vehicle->purchase_price;
     }
 
-    $item->total_amount_pending = (float) $item->total_amount != $item->purchase_order_vehicles_amount;
+    $item->total_amount_pending = ((float) $item->total_amount + (float) $item->warranty_amount) != $item->purchase_order_vehicles_amount;
 
     return $item;
   }

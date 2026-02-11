@@ -18,7 +18,6 @@ use App\Http\Controllers\LegacyVehicleTradeController;
 use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\OriginTypeController;
 use App\Http\Controllers\PurchaseOrderController;
-use App\Http\Controllers\PurchaseOrderPaymentController;
 use App\Http\Controllers\PurchaseOrderReceiptController;
 use App\Http\Controllers\PurchaseOrderVehicleController;
 use App\Http\Controllers\RoleController;
