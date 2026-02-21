@@ -147,7 +147,7 @@ class VehicleInvestorController extends Controller
 
       return $this->apiRsp(
         $is_store_mode ? 201 : 200,
-        'Inversión ' . ($is_store_mode ? 'agregada' : 'editada') . ' correctamente',
+        'Inversionista ' . ($is_store_mode ? 'agregado' : 'editado') . ' correctamente',
         $is_store_mode ? ['item' => ['id' => $item->id]] : null
       );
     } catch (Throwable $err) {

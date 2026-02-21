@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\DocMgrController;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
@@ -108,6 +109,15 @@ class Vehicle extends Model
 
     $item->purchase_order_vehicle->vat_type = VatType::find($item->purchase_order_vehicle->vat_type_id, ['name']);
     $item->purchase_order_vehicle->purchase_order_uiid = PurchaseOrder::getUiid($item->purchase_order_vehicle->purchase_order_id);
+    $item->purchase_order_vehicle->purchase_order = PurchaseOrder::find($item->purchase_order_vehicle->purchase_order_id, ['statement_path']);
+    $item->purchase_order_vehicle->purchase_order->statement_b64 = DocMgrController::getB64($item->purchase_order_vehicle->purchase_order->statement_path, 'PurchaseOrder');
+
+    $item->total = [
+      'vehicle_investors' => VehicleInvestor::where('vehicle_id', $item->id)->where('is_active', 1)->count(),
+      'vehicle_expenses' => VehicleExpense::where('vehicle_id', $item->id)->where('is_active', 1)->count(),
+      'vehicle_invoices' => VehicleInvoice::where('vehicle_id', $item->id)->where('is_active', 1)->count(),
+      'vehicle_documents' => VehicleDocument::where('vehicle_id', $item->id)->where('is_active', 1)->count(),
+    ];
 
     return $item;
   }

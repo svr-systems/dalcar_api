@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Vendor;
 use App\Models\VendorBank;
+use App\Models\VendorDocumentType;
+use App\Models\VendorInvoiceType;
 use DB;
 use Illuminate\Http\Request;
 use Throwable;
@@ -131,6 +133,7 @@ class VendorController extends Controller
       $vendor_bank_item = VendorBank::find($vendor_bank->id);
       if (!$vendor_bank_item) {
         $vendor_bank_item = new VendorBank;
+        $vendor_bank_item->vendor_id = $item->id;
       }
 
       $vendor_bank_item->is_active = GenController::filter($vendor_bank->is_active, 'b');
@@ -140,8 +143,35 @@ class VendorController extends Controller
       $vendor_bank_item->account_number = GenController::filter($vendor_bank->account_number, 'U');
       $vendor_bank_item->cie_code = GenController::filter($vendor_bank->cie_code, 'U');
       $vendor_bank_item->is_commission = GenController::filter($vendor_bank->is_commission, 'b');
-      $vendor_bank_item->vendor_id = $item->id;
       $vendor_bank_item->save();
+    }
+
+    $vendor_invoice_types = json_decode(json_encode($data->vendor_invoice_types));
+    foreach ($vendor_invoice_types as $vendor_invoice_type) {
+      $vendor_invoice_type_item = VendorInvoiceType::find($vendor_invoice_type->id);
+      if (!$vendor_invoice_type_item) {
+        $vendor_invoice_type_item = new VendorInvoiceType;
+        $vendor_invoice_type_item->vendor_id = $item->id;
+      }
+
+      $vendor_invoice_type_item->is_active = GenController::filter($vendor_invoice_type->is_active, 'b');
+      $vendor_invoice_type_item->invoice_type_id = GenController::filter($vendor_invoice_type->invoice_type_id, 'id');
+      $vendor_invoice_type_item->delivery_days = GenController::filter($vendor_invoice_type->delivery_days, 'd');
+      $vendor_invoice_type_item->save();
+    }
+
+    $vendor_document_types = json_decode(json_encode($data->vendor_document_types));
+    foreach ($vendor_document_types as $vendor_document_type) {
+      $vendor_document_type_item = VendorDocumentType::find($vendor_document_type->id);
+      if (!$vendor_document_type_item) {
+        $vendor_document_type_item = new VendorDocumentType;
+        $vendor_document_type_item->vendor_id = $item->id;
+      }
+
+      $vendor_document_type_item->is_active = GenController::filter($vendor_document_type->is_active, 'b');
+      $vendor_document_type_item->document_type_id = GenController::filter($vendor_document_type->document_type_id, 'id');
+      $vendor_document_type_item->delivery_days = GenController::filter($vendor_document_type->delivery_days, 'd');
+      $vendor_document_type_item->save();
     }
 
     return $item;

@@ -66,14 +66,21 @@ class Vendor extends Model
     $item->requires_reference = (bool) $item->requires_reference;
     $item->requires_statement = (bool) $item->requires_statement;
     $item->vendor_type = VendorType::find($item->vendor_type_id, ['name']);
-    $item->vendor_banks = VendorBank::query()
-      ->where('vendor_id', $item->id)
-      ->where('is_active', true)
-      ->get();
 
+    $item->vendor_banks = VendorBank::where('vendor_id', $item->id)->where('is_active', 1)->get();
     foreach ($item->vendor_banks as $vendor_bank) {
       $vendor_bank->bank = Bank::find($vendor_bank->bank_id, ['name']);
       $vendor_bank->is_commission = (bool) $vendor_bank->is_commission;
+    }
+
+    $item->vendor_invoice_types = VendorInvoiceType::where('vendor_id', $item->id)->where('is_active', 1)->get();
+    foreach ($item->vendor_invoice_types as $vendor_invoice_type) {
+      $vendor_invoice_type->invoice_type = InvoiceType::find($vendor_invoice_type->invoice_type_id, ['name']);
+    }
+
+    $item->vendor_document_types = VendorDocumentType::where('vendor_id', $item->id)->where('is_active', 1)->get();
+    foreach ($item->vendor_document_types as $vendor_document_type) {
+      $vendor_document_type->document_type = DocumentType::find($vendor_document_type->document_type_id, ['name']);
     }
 
     return $item;

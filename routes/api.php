@@ -9,6 +9,7 @@ use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvestorTypeController;
+use App\Http\Controllers\InvoiceTypeController;
 use App\Http\Controllers\LegacyVehicleController;
 use App\Http\Controllers\LegacyVehicleDocumentController;
 use App\Http\Controllers\LegacyVehicleExpenseController;
@@ -27,7 +28,10 @@ use App\Http\Controllers\VatTypeController;
 use App\Http\Controllers\VehicleBrandController;
 use App\Http\Controllers\VehicleColorController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\VehicleDocumentController;
+use App\Http\Controllers\VehicleExpenseController;
 use App\Http\Controllers\VehicleInvestorController;
+use App\Http\Controllers\VehicleInvoiceController;
 use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\VehicleTransmissionController;
 use App\Http\Controllers\VehicleVersionController;
@@ -47,6 +51,24 @@ Route::post('login', [AuthController::class, 'login']);
  */
 Route::group(['middleware' => 'auth:api'], function () {
   Route::group(['prefix' => 'vehicles'], function () {
+    Route::delete('vehicle_documents/{id}', [VehicleDocumentController::class, 'destroy']);
+    Route::patch('vehicle_documents/{id}', [VehicleDocumentController::class, 'update']);
+    Route::get('vehicle_documents/{id}', [VehicleDocumentController::class, 'show']);
+    Route::post('vehicle_documents', [VehicleDocumentController::class, 'store']);
+    Route::get('{vehicle_id}/vehicle_documents', [VehicleDocumentController::class, 'index'])
+    ;
+    Route::delete('vehicle_invoices/{id}', [VehicleInvoiceController::class, 'destroy']);
+    Route::patch('vehicle_invoices/{id}', [VehicleInvoiceController::class, 'update']);
+    Route::get('vehicle_invoices/{id}', [VehicleInvoiceController::class, 'show']);
+    Route::post('vehicle_invoices', [VehicleInvoiceController::class, 'store']);
+    Route::get('{vehicle_id}/vehicle_invoices', [VehicleInvoiceController::class, 'index']);
+
+    Route::delete('vehicle_expenses/{id}', [VehicleExpenseController::class, 'destroy']);
+    Route::patch('vehicle_expenses/{id}', [VehicleExpenseController::class, 'update']);
+    Route::get('vehicle_expenses/{id}', [VehicleExpenseController::class, 'show']);
+    Route::post('vehicle_expenses', [VehicleExpenseController::class, 'store']);
+    Route::get('{vehicle_id}/vehicle_expenses', [VehicleExpenseController::class, 'index']);
+
     Route::delete('vehicle_investors/{id}', [VehicleInvestorController::class, 'destroy']);
     Route::patch('vehicle_investors/{id}', [VehicleInvestorController::class, 'update']);
     Route::get('vehicle_investors/{id}', [VehicleInvestorController::class, 'show']);
@@ -102,6 +124,7 @@ Route::group(['middleware' => 'auth:api'], function () {
   /**
    * Catalogs CRUD
    */
+  Route::apiResource('invoice_types', InvoiceTypeController::class);
   Route::apiResource('expense_types', ExpenseTypeController::class);
   Route::apiResource('document_types', DocumentTypeController::class);
   Route::apiResource('custom_offices', CustomOfficeController::class);

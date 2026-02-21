@@ -109,6 +109,27 @@ return [
       'visibility' => 'public',
     ],
 
+    'VehicleExpense' => [
+      'driver' => 'local',
+      'root' => storage_path('app/private/VehicleExpense'),
+      'url' => env('APP_URL') . '/storage',
+      'visibility' => 'public',
+    ],
+
+    'VehicleInvoice' => [
+      'driver' => 'local',
+      'root' => storage_path('app/private/VehicleInvoice'),
+      'url' => env('APP_URL') . '/storage',
+      'visibility' => 'public',
+    ],
+
+    'VehicleDocument' => [
+      'driver' => 'local',
+      'root' => storage_path('app/private/VehicleDocument'),
+      'url' => env('APP_URL') . '/storage',
+      'visibility' => 'public',
+    ],
+
     'temp' => [
       'driver' => 'local',
       'root' => storage_path('app/private/temp'),
