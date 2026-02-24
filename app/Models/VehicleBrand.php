@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Validator;
 
-class VehicleBrand extends Model {
+class VehicleBrand extends Model
+{
   use HasFactory;
   public $timestamps = false;
 
-  public static function valid($data, $is_req = true) {
+  public static function valid($data, $is_req = true)
+  {
     $rules = [
       'name' => 'required|min:2|max:60',
     ];
@@ -24,13 +26,14 @@ class VehicleBrand extends Model {
     return Validator::make($data, $rules, $msgs);
   }
 
-  static public function getItems($req) {
+  static public function getItems($req)
+  {
     $items = VehicleBrand::
       orderBy('name')->
       where('is_active', boolval($req->is_active));
 
     $items = $items->
-    get([
+      get([
         'id',
         'is_active',
         'name',
@@ -43,13 +46,24 @@ class VehicleBrand extends Model {
     return $items;
   }
 
-  static public function getItem($req, $id) {
+  static public function getItem($req, $id)
+  {
     $item = VehicleBrand::
-    find($id, [
+      find($id, [
         'id',
         'is_active',
         'name',
       ]);
+
+    return $item;
+  }
+
+  static public function getItemCatalogs($req, $id)
+  {
+    $item = VehicleBrand::find($id);
+    $item->vehicle_models = VehicleModel::where('vehicle_brand_id', $item->id)->where('is_active', 1)->get();
+    $item->vehicle_colors = VehicleColor::where('vehicle_brand_id', $item->id)->where('is_active', 1)->get();
+    $item->vehicle_transmissions = VehicleTransmission::where('vehicle_brand_id', $item->id)->where('is_active', 1)->get();
 
     return $item;
   }

@@ -78,7 +78,7 @@ Route::group(['middleware' => 'auth:api'], function () {
   Route::apiResource('vehicles', VehicleController::class);
 
   Route::group(['prefix' => 'purchase_orders'], function () {
-    Route::post('purchase_order_receipts', [PurchaseOrderReceiptController::class, 'store']);
+    Route::post('purchase_order_receipts', [PurchaseOrderReceiptController::class, 'storeUpdate']);
     Route::get('{purchase_order_id}/purchase_order_receipts', [PurchaseOrderReceiptController::class, 'index']);
 
     Route::delete('purchase_order_vehicles/{id}', [PurchaseOrderVehicleController::class, 'destroy']);
@@ -132,6 +132,8 @@ Route::group(['middleware' => 'auth:api'], function () {
   Route::apiResource('vehicle_colors', VehicleColorController::class);
   Route::apiResource('vehicle_versions', VehicleVersionController::class);
   Route::apiResource('vehicle_models', VehicleModelController::class);
+
+  Route::get('vehicle_brands/{id}/catalogs', [VehicleBrandController::class, 'getItemCatalogs']);
   Route::apiResource('vehicle_brands', VehicleBrandController::class);
 
   /**

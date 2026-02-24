@@ -1,11 +1,11 @@
 <div class="footer">
-  <p>
-    Este correo electrónico puede contener información confidencial, por lo que queda estrictamente prohibido el uso,
-    reproducción, retransmisión o divulgación no autorizada, parcial o total, de su contenido. Si usted no es el
-    destinatario del presente correo, por favor eliminelo junto con cualquier documento adjunto que pudiera contener. El
-    tratamiento de los datos personales en SOLMETEC Soluciones Médicas se realiza conforme al Aviso de Privacidad que se
-    encuentra disponible en la página de internet
-    <br />
-    <a href="https://test.svr.com.mx" style="color: inherit">solmetec.mx</a>
+  <p style="margin:15px 0 0 0; font-size:11px; color:#777; line-height:1.5;">
+    Este correo electrónico y cualquier archivo adjunto pueden contener información confidencial y/o privilegiada.
+    Su uso, reproducción, distribución o divulgación no autorizada, total o parcial, está estrictamente prohibida.
+    Si usted no es el destinatario previsto, le solicitamos eliminar este mensaje y notificar al remitente.
+  </p>
+
+  <p style="margin:10px 0 0 0; font-size:11px; color:#999;">
+    © {{ date('Y') }} DALCAR MOTORS. Todos los derechos reservados.
   </p>
 </div>

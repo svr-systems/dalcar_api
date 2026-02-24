@@ -40,6 +40,8 @@ class PurchaseOrderReceipt extends Model
       ->where('is_active', 1)
       ->get([
         'id',
+        'is_active',
+        'purchase_order_id',
         'note',
         'file_path',
       ]);

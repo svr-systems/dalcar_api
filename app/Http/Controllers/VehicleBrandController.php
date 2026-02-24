@@ -9,7 +9,8 @@ use Throwable;
 
 class VehicleBrandController extends Controller
 {
-  public function index(Request $req) {
+  public function index(Request $req)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -21,7 +22,8 @@ class VehicleBrandController extends Controller
     }
   }
 
-  public function show(Request $req, $id) {
+  public function show(Request $req, $id)
+  {
     try {
       return $this->apiRsp(
         200,
@@ -33,8 +35,23 @@ class VehicleBrandController extends Controller
     }
   }
 
-  public function destroy(Request $req, $id) {
+  public function getItemCatalogs(Request $req, $id)
+  {
+    try {
+      return $this->apiRsp(
+        200,
+        'Registro retornado correctamente',
+        ['item' => VehicleBrand::getItemCatalogs($req, $id)]
+      );
+    } catch (Throwable $err) {
+      return $this->apiRsp(500, null, $err);
+    }
+  }
+
+  public function destroy(Request $req, $id)
+  {
     DB::beginTransaction();
+
     try {
       $item = VehicleBrand::find($id);
 
@@ -46,26 +63,31 @@ class VehicleBrandController extends Controller
       $item->save();
 
       DB::commit();
+
       return $this->apiRsp(
         200,
         'Registro inactivado correctamente'
       );
     } catch (Throwable $err) {
       DB::rollback();
+
       return $this->apiRsp(500, null, $err);
     }
 
   }
 
-  public function store(Request $req) {
+  public function store(Request $req)
+  {
     return $this->storeUpdate($req, null);
   }
 
-  public function update(Request $req, $id) {
+  public function update(Request $req, $id)
+  {
     return $this->storeUpdate($req, $id);
   }
 
-  public function storeUpdate($req, $id) {
+  public function storeUpdate($req, $id)
+  {
     DB::beginTransaction();
     try {
 
@@ -97,7 +119,8 @@ class VehicleBrandController extends Controller
     }
   }
 
-  public static function saveItem($item, $data, $is_req = true) {
+  public static function saveItem($item, $data, $is_req = true)
+  {
     if (!$is_req) {
       $item->active = GenController::filter($data->active, 'b');
     }

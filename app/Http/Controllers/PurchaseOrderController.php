@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderPayment;
+use App\Models\User;
 use DB;
 use Illuminate\Http\Request;
+use stdClass;
 use Throwable;
 
 class PurchaseOrderController extends Controller
@@ -90,6 +92,7 @@ class PurchaseOrderController extends Controller
   public function storeUpdate($req, $id)
   {
     DB::beginTransaction();
+
     try {
       $valid = PurchaseOrder::valid($req->all());
 
@@ -110,7 +113,27 @@ class PurchaseOrderController extends Controller
 
       $item = $this->saveItem($item, $req);
 
+      if ($store_mode) {
+        $data = new stdClass;
+        $data->uiid = PurchaseOrder::getUiid($item->id);
+
+        $data = new stdClass;
+        $data->uiid = PurchaseOrder::getUiid($item->id);
+
+        $emails = User::query()
+          ->where('is_active', 1)
+          ->where('role_id', 3)
+          ->where('receives_po_emails', 1)
+          ->pluck('email')
+          ->filter()
+          ->unique()
+          ->values();
+
+        EmailController::orderPaymentStore($emails, $data);
+      }
+
       DB::commit();
+
       return $this->apiRsp(
         $store_mode ? 201 : 200,
         'Registro ' . ($store_mode ? 'agregado' : 'editado') . ' correctamente',
@@ -118,6 +141,7 @@ class PurchaseOrderController extends Controller
       );
     } catch (Throwable $err) {
       DB::rollback();
+
       return $this->apiRsp(500, null, $err);
     }
   }
@@ -137,6 +161,12 @@ class PurchaseOrderController extends Controller
       $data->statement_path,
       DocMgrController::exist($data->statement_doc),
       $data->statement_dlt,
+      'PurchaseOrder'
+    );
+    $item->other_path = DocMgrController::save(
+      $data->other_path,
+      DocMgrController::exist($data->other_doc),
+      $data->other_dlt,
       'PurchaseOrder'
     );
     $item->note = GenController::filter($data->note, 'U');

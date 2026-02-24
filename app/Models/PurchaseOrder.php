@@ -96,6 +96,11 @@ class PurchaseOrder extends Model
     $item->branch = Branch::find($item->branch_id, ['name']);
     $item->vendor = Vendor::find($item->vendor_id, ['name']);
     $item->statement_b64 = DocMgrController::getB64($item->statement_path, 'PurchaseOrder');
+    $item->statement_doc = null;
+    $item->statement_dlt = false;
+    $item->other_b64 = DocMgrController::getB64($item->other_path, 'PurchaseOrder');
+    $item->other_doc = null;
+    $item->other_dlt = false;
     $item->total_amount = (float) $item->total_amount;
 
     $item->days_remaining = null;

@@ -119,23 +119,7 @@ class User extends Authenticatable
 
   static public function getItem($req, $id)
   {
-    $item = User::
-      find($id, [
-        'id',
-        'is_active',
-        'created_at',
-        'updated_at',
-        'created_by_id',
-        'updated_by_id',
-        'email_verified_at',
-        'name',
-        'paternal_surname',
-        'maternal_surname',
-        'phone',
-        'email',
-        'role_id',
-        'avatar_path',
-      ]);
+    $item = User::find($id);
 
     if ($item) {
       $item->uiid = User::getUiid($item->id);
@@ -147,6 +131,11 @@ class User extends Authenticatable
       $item->avatar_b64 = DocMgrController::getB64($item->avatar, 'User');
       $item->avatar_doc = null;
       $item->avatar_dlt = false;
+      $item->receives_po_emails = (bool) $item->receives_po_emails;
+      $item->receives_vehicle_emails = (bool) $item->receives_vehicle_emails;
+      $item->receives_invoice_calendar_emails = (bool) $item->receives_invoice_calendar_emails;
+      $item->receives_document_calendar_emails = (bool) $item->receives_document_calendar_emails;
+
       $item->user_branches = UserBranche::where('user_id', $item->id)->
         where('is_active', true)->
         get();

@@ -24,36 +24,76 @@ class PurchaseOrderReceiptController extends Controller
     }
   }
 
-  public function store(Request $request)
+  public function storeUpdate(Request $request)
   {
     DB::beginTransaction();
 
     try {
-      $purchase_order = PurchaseOrder::find($request->purchase_order_id);
+      $user_id = $request->user()->id;
+      $purchase_order_id = (int) $request->purchase_order_id;
 
-      $purchase_order_receipts = json_decode($request->purchase_order_receipts);
+      $purchase_order = PurchaseOrder::query()->find($purchase_order_id);
+      if (is_null($purchase_order)) {
+        return $this->apiRsp(404, 'Orden de pago no encontrada');
+      }
+
+      $purchase_order_receipts = json_decode((string) $request->purchase_order_receipts);
+      if (!is_array($purchase_order_receipts)) {
+        return $this->apiRsp(422, 'purchase_order_receipts inválido');
+      }
+
       foreach ($purchase_order_receipts as $key => $purchase_order_receipt) {
+        $is_active = GenController::filter($purchase_order_receipt->is_active, 'b');
         $file_name = 'purchase_order_receipts_file_doc_' . $key;
 
-        $purchase_order_receipt_item = new PurchaseOrderReceipt;
-        $purchase_order_receipt_item->purchase_order_id = $purchase_order->id;
-        $purchase_order_receipt_item->file_path = DocMgrController::save(null, DocMgrController::exist($request->$file_name), false, 'PurchaseOrderReceipt');
-        $purchase_order_receipt_item->note = GenController::trim($purchase_order_receipt->note);
+        $purchase_order_receipt_item = PurchaseOrderReceipt::query()
+          ->where('id', $purchase_order_receipt->id)
+          ->where('purchase_order_id', $purchase_order->id)
+          ->first();
+
+        if (is_null($purchase_order_receipt_item)) {
+          $purchase_order_receipt_item = new PurchaseOrderReceipt();
+          $purchase_order_receipt_item->purchase_order_id = $purchase_order->id;
+        }
+
+        $purchase_order_receipt_item->is_active = $is_active;
+
+        if ($is_active) {
+          $purchase_order_receipt_item->note = GenController::trim($purchase_order_receipt->note);
+
+          $file_doc = $request->file($file_name);
+
+          if (!is_null($file_doc)) {
+            $purchase_order_receipt_item->file_path = DocMgrController::replaceOrDelete(
+              $purchase_order_receipt_item->file_path,
+              $file_doc,
+              'PurchaseOrderReceipt'
+            );
+          }
+        }
+
         $purchase_order_receipt_item->save();
       }
 
-      $purchase_order->paid_at = Carbon::now();
-      $purchase_order->paid_by_id = $request->user()->id;
+      $has_active = PurchaseOrderReceipt::query()
+        ->where('purchase_order_id', $purchase_order_id)
+        ->where('is_active', 1)
+        ->exists();
+
+      $purchase_order->updated_by_id = $user_id;
+      $purchase_order->paid_by_id = $has_active ? $user_id : null;
+      $purchase_order->paid_at = $has_active ? Carbon::now() : null;
       $purchase_order->save();
 
       DB::commit();
+
       return $this->apiRsp(
-        201,
-        'Comprobantes agregados correctamente',
+        200,
+        'Comprobantes actualizados correctamente',
         ['item' => ['id' => $purchase_order->id]]
       );
     } catch (Throwable $err) {
-      DB::rollback();
+      DB::rollBack();
       return $this->apiRsp(500, null, $err);
     }
   }

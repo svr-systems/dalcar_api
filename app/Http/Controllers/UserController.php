@@ -149,6 +149,10 @@ class UserController extends Controller
     $item->email = GenController::filter($data->email, 'l');
     $item->role_id = GenController::filter($data->role_id, 'id');
     $item->phone = GenController::filter($data->phone, 'U');
+    $item->receives_po_emails = GenController::filter($data->receives_po_emails, 'b');
+    $item->receives_vehicle_emails = GenController::filter($data->receives_vehicle_emails, 'b');
+    $item->receives_invoice_calendar_emails = GenController::filter($data->receives_invoice_calendar_emails, 'b');
+    $item->receives_document_calendar_emails = GenController::filter($data->receives_document_calendar_emails, 'b');
 
     if (isset($data->avatar_doc)) {
       $item->avatar_path = DocMgrController::save(
