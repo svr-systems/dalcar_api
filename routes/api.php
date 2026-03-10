@@ -7,6 +7,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomOfficeController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\ExpenseTypeController;
+use App\Http\Controllers\FinancierController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvestorTypeController;
 use App\Http\Controllers\InvoiceTypeController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\LegacyVehicleInvoiceController;
 use App\Http\Controllers\LegacyVehicleTradeController;
 use App\Http\Controllers\MunicipalityController;
 use App\Http\Controllers\OriginTypeController;
+use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseOrderReceiptController;
 use App\Http\Controllers\PurchaseOrderVehicleController;
@@ -33,6 +35,7 @@ use App\Http\Controllers\VehicleExpenseController;
 use App\Http\Controllers\VehicleInvestorController;
 use App\Http\Controllers\VehicleInvoiceController;
 use App\Http\Controllers\VehicleModelController;
+use App\Http\Controllers\VehicleReservationController;
 use App\Http\Controllers\VehicleTransmissionController;
 use App\Http\Controllers\VehicleVersionController;
 use App\Http\Controllers\VendorController;
@@ -40,23 +43,53 @@ use App\Http\Controllers\VendorTypeController;
 use Illuminate\Support\Facades\Route;
 
 /**
+ * ===========================================
  * Public
+ * ===========================================
  */
 Route::post('login', [AuthController::class, 'login']);
+
+/**
+ * ===========================================
+ * Authenticated
+ * ===========================================
+ */
+Route::group(['middleware' => 'auth:api'], function () {
+  Route::post('logout', [AuthController::class, 'logout']);
+});
 
 /**
  * ===========================================
  * System
  * ===========================================
  */
-Route::group(['middleware' => 'auth:api'], function () {
+Route::group(['middleware' => ['auth:api', 'system']], function () {
+  /**
+   * ===========================================
+   * Vehicle Reservations
+   * ===========================================
+   */
+  Route::group(['prefix' => 'vehicle_reservations'], function () {
+    Route::patch('{id}/response', [VehicleReservationController::class, 'response']);
+    Route::get('{id}', [VehicleReservationController::class, 'show']);
+    Route::get('', [VehicleReservationController::class, 'index']);
+  });
+
+  /**
+   * ===========================================
+   * Vehicles
+   * ===========================================
+   */
   Route::group(['prefix' => 'vehicles'], function () {
+    Route::patch('{vehicle_id}/published_status', [VehicleController::class, 'togglePublishedStatus']);
+    Route::patch('{vehicle_id}/sale_price', [VehicleController::class, 'updateSalePrice']);
+
     Route::delete('vehicle_documents/{id}', [VehicleDocumentController::class, 'destroy']);
     Route::patch('vehicle_documents/{id}', [VehicleDocumentController::class, 'update']);
     Route::get('vehicle_documents/{id}', [VehicleDocumentController::class, 'show']);
     Route::post('vehicle_documents', [VehicleDocumentController::class, 'store']);
-    Route::get('{vehicle_id}/vehicle_documents', [VehicleDocumentController::class, 'index'])
-    ;
+    Route::get('{vehicle_id}/vehicle_documents', [VehicleDocumentController::class, 'index']);
+
     Route::delete('vehicle_invoices/{id}', [VehicleInvoiceController::class, 'destroy']);
     Route::patch('vehicle_invoices/{id}', [VehicleInvoiceController::class, 'update']);
     Route::get('vehicle_invoices/{id}', [VehicleInvoiceController::class, 'show']);
@@ -77,6 +110,11 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::apiResource('vehicles', VehicleController::class);
 
+  /**
+   * ===========================================
+   * Purchase Orders
+   * ===========================================
+   */
   Route::group(['prefix' => 'purchase_orders'], function () {
     Route::post('purchase_order_receipts', [PurchaseOrderReceiptController::class, 'storeUpdate']);
     Route::get('{purchase_order_id}/purchase_order_receipts', [PurchaseOrderReceiptController::class, 'index']);
@@ -88,11 +126,15 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('{purchase_order_id}/purchase_order_vehicles', [PurchaseOrderVehicleController::class, 'index']);
 
     Route::get('vendor', [VendorController::class, 'getItemToPurchaseOrder']);
-
     Route::post('restore', [PurchaseOrderController::class, 'restore']);
   });
   Route::apiResource('purchase_orders', PurchaseOrderController::class);
 
+  /**
+   * ===========================================
+   * Legacy Vehicles
+   * ===========================================
+   */
   Route::group(['prefix' => 'legacy_vehicles'], function () {
     Route::apiResource('legacy_vehicle_invoices', LegacyVehicleInvoiceController::class);
     Route::apiResource('legacy_vehicle_documents', LegacyVehicleDocumentController::class);
@@ -103,26 +145,54 @@ Route::group(['middleware' => 'auth:api'], function () {
   });
   Route::apiResource('legacy_vehicles', LegacyVehicleController::class);
 
-  Route::apiResource('investors', InvestorController::class);
+  /**
+   * ===========================================
+   * Financiers
+   * ===========================================
+   */
+  Route::group(['prefix' => 'financiers'], function () {
+    Route::post('restore', [FinancierController::class, 'restore']);
+  });
+  Route::apiResource('financiers', FinancierController::class);
 
   /**
-   * Vendor
+   * ===========================================
+   * Vendors
+   * ===========================================
    */
   Route::group(['prefix' => 'vendors'], function () {
     Route::post('restore', [VendorController::class, 'restore']);
   });
   Route::apiResource('vendors', VendorController::class);
 
-  Route::apiResource('companies/branches', BranchController::class);
+  /**
+   * ===========================================
+   * Investors
+   * ===========================================
+   */
+  Route::apiResource('investors', InvestorController::class);
 
+  /**
+   * ===========================================
+   * Companies
+   * ===========================================
+   */
+  Route::apiResource('companies/branches', BranchController::class);
   Route::apiResource('companies', CompanyController::class);
 
+  /**
+   * ===========================================
+   * Users
+   * ===========================================
+   */
   Route::get('users/file/json', [UserController::class, 'getUserFile']);
   Route::post('users/dni', [UserController::class, 'getDni']);
   Route::apiResource('users', UserController::class);
 
   /**
+   * ===========================================
    * Catalogs CRUD
+   * ===========================================
    */
   Route::apiResource('invoice_types', InvoiceTypeController::class);
   Route::apiResource('expense_types', ExpenseTypeController::class);
@@ -137,7 +207,9 @@ Route::group(['middleware' => 'auth:api'], function () {
   Route::apiResource('vehicle_brands', VehicleBrandController::class);
 
   /**
+   * ===========================================
    * Catalogs
+   * ===========================================
    */
   Route::get('vat_types', [VatTypeController::class, 'index']);
   Route::get('origin_types', [OriginTypeController::class, 'index']);
@@ -147,4 +219,38 @@ Route::group(['middleware' => 'auth:api'], function () {
   Route::get('municipalities', [MunicipalityController::class, 'index']);
   Route::get('states', [StateController::class, 'index']);
   Route::get('roles', [RoleController::class, 'index']);
+});
+
+/**
+ * ===========================================
+ * Seller (role_id == 5)
+ * ===========================================
+ */
+Route::group([
+  'prefix' => 'seller',
+  'middleware' => ['auth:api', 'seller'],
+], function () {
+  /**
+   * ===========================================
+   * Vehicle Reservations
+   * ===========================================
+   */
+  Route::get('vehicles/{vehicle_id}/reservation', [VehicleReservationController::class, 'sellerShow']);
+  Route::post('vehicle_reservations', [VehicleReservationController::class, 'sellerStore']);
+
+  /**
+   * ===========================================
+   * Vehicles
+   * ===========================================
+   */
+  Route::get('vehicles', [VehicleController::class, 'sellerIndex']);
+  Route::get('vehicles/{vehicle_id}', [VehicleController::class, 'sellerShow']);
+
+  /**
+   * ===========================================
+   * Catalogs
+   * ===========================================
+   */
+  Route::get('payment_methods', [PaymentMethodController::class, 'index']);
+  Route::get('financiers', [FinancierController::class, 'index']);
 });

@@ -130,6 +130,13 @@ return [
       'visibility' => 'public',
     ],
 
+    'VehicleReservation' => [
+      'driver' => 'local',
+      'root' => storage_path('app/private/VehicleReservation'),
+      'url' => env('APP_URL') . '/storage',
+      'visibility' => 'public',
+    ],
+
     'temp' => [
       'driver' => 'local',
       'root' => storage_path('app/private/temp'),

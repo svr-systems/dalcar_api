@@ -23,7 +23,7 @@ return new class extends Migration {
       $table->date('order_date');
       $table->foreignId('vendor_id')->constrained('vendors');
       $table->date('due_date');
-      $table->string('reference', 40)->nullable();
+      $table->string('reference', 100)->nullable();
       $table->string('statement_path', 50)->nullable();
       $table->string('note', 255)->nullable();
 

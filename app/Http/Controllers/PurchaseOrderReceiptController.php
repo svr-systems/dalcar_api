@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderReceipt;
+use App\Models\PurchaseOrderVehicle;
+use App\Models\User;
+use App\Models\Vehicle;
 use DB;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -37,6 +40,8 @@ class PurchaseOrderReceiptController extends Controller
         return $this->apiRsp(404, 'Orden de pago no encontrada');
       }
 
+      $was_paid = !is_null($purchase_order->paid_at);
+
       $purchase_order_receipts = json_decode((string) $request->purchase_order_receipts);
       if (!is_array($purchase_order_receipts)) {
         return $this->apiRsp(422, 'purchase_order_receipts inválido');
@@ -48,12 +53,12 @@ class PurchaseOrderReceiptController extends Controller
 
         $purchase_order_receipt_item = PurchaseOrderReceipt::query()
           ->where('id', $purchase_order_receipt->id)
-          ->where('purchase_order_id', $purchase_order->id)
+          ->where('purchase_order_id', $purchase_order_id)
           ->first();
 
         if (is_null($purchase_order_receipt_item)) {
           $purchase_order_receipt_item = new PurchaseOrderReceipt();
-          $purchase_order_receipt_item->purchase_order_id = $purchase_order->id;
+          $purchase_order_receipt_item->purchase_order_id = $purchase_order_id;
         }
 
         $purchase_order_receipt_item->is_active = $is_active;
@@ -84,6 +89,51 @@ class PurchaseOrderReceiptController extends Controller
       $purchase_order->paid_by_id = $has_active ? $user_id : null;
       $purchase_order->paid_at = $has_active ? Carbon::now() : null;
       $purchase_order->save();
+
+      $is_now_paid = !is_null($purchase_order->paid_at);
+
+      if (!$was_paid && $is_now_paid) {
+        $emails = User::query()
+          ->where('is_active', 1)
+          ->where('receives_vehicle_emails', 1)
+          ->pluck('email')
+          ->filter()
+          ->unique()
+          ->values();
+
+        if ($emails->isNotEmpty()) {
+          $vehicles = PurchaseOrderVehicle::query()
+            ->join('vehicles', 'vehicles.id', '=', 'purchase_order_vehicles.vehicle_id')
+            ->join('vehicle_versions', 'vehicle_versions.id', '=', 'vehicles.vehicle_version_id')
+            ->join('vehicle_models', 'vehicle_models.id', '=', 'vehicle_versions.vehicle_model_id')
+            ->join('vehicle_brands', 'vehicle_brands.id', '=', 'vehicle_models.vehicle_brand_id')
+            ->join('vehicle_colors', 'vehicle_colors.id', '=', 'vehicles.vehicle_color_id')
+            ->where('purchase_order_vehicles.purchase_order_id', $purchase_order_id)
+            ->where('purchase_order_vehicles.is_active', 1)
+            ->orderBy('vehicles.id', 'asc')
+            ->get([
+              'vehicles.id AS vehicle_id',
+              'vehicle_brands.name AS vehicle_brand_name',
+              'vehicle_models.name AS vehicle_model_name',
+              'vehicle_versions.name AS vehicle_version_name',
+              'vehicle_versions.model_year AS vehicle_version_model_year',
+              'vehicle_colors.name AS vehicle_color_name',
+            ])
+            ->unique('vehicle_id')
+            ->values()
+            ->each(function ($item) {
+              $item->uiid = Vehicle::getUiid((int) $item->vehicle_id);
+            });
+
+          if ($vehicles->isNotEmpty()) {
+            $data = (object) [
+              'vehicles' => $vehicles,
+            ];
+
+            EmailController::vehiclesInventoryReleased($emails, $data);
+          }
+        }
+      }
 
       DB::commit();
 

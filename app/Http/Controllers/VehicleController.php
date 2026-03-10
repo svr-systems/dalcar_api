@@ -84,4 +84,137 @@ class VehicleController extends Controller
 
     return $item;
   }
+
+  public function updateSalePrice(Request $request, $vehicle_id)
+  {
+    DB::beginTransaction();
+
+    try {
+      $user_id = (int) $request->user()->id;
+
+      $item = Vehicle::find($vehicle_id);
+      if (!$item) {
+        DB::rollBack();
+        return $this->apiRsp(404, 'Registro no encontrado');
+      }
+
+      $sale_price = $request->input('sale_price');
+
+      if (is_null($sale_price) || $sale_price === '') {
+        DB::rollBack();
+        return $this->apiRsp(422, 'sale_price es requerido');
+      }
+
+      $sale_price = (float) $sale_price;
+
+      if ($sale_price < 0) {
+        DB::rollBack();
+        return $this->apiRsp(422, 'sale_price no puede ser negativo');
+      }
+
+      if ((bool) $item->is_published && $sale_price <= 0) {
+        DB::rollBack();
+        return $this->apiRsp(422, 'No se puede establecer un precio de venta en 0 mientras el vehículo esté publicado');
+      }
+
+      $item->updated_by_id = $user_id;
+      $item->sale_price = $sale_price;
+      $item->sale_price_updated_at = now();
+      $item->sale_price_updated_by_id = $user_id;
+      $item->is_published = $sale_price > 0;
+      $item->save();
+
+      DB::commit();
+
+      return $this->apiRsp(200, 'Precio de venta actualizado correctamente', [
+        'item' => [
+          'id' => $item->id,
+          'sale_price' => $item->sale_price,
+          'sale_price_updated_at' => $item->sale_price_updated_at,
+          'sale_price_updated_by_id' => $item->sale_price_updated_by_id,
+          'is_published' => (bool) $item->is_published,
+        ],
+      ]);
+    } catch (Throwable $err) {
+      DB::rollBack();
+      return $this->apiRsp(500, null, $err);
+    }
+  }
+
+  public function togglePublishedStatus(Request $request, $vehicle_id)
+  {
+    DB::beginTransaction();
+
+    try {
+      $user_id = (int) $request->user()->id;
+
+      $item = Vehicle::find($vehicle_id);
+      if (!$item) {
+        DB::rollBack();
+        return $this->apiRsp(404, 'Registro no encontrado');
+      }
+
+      $is_published = !$item->is_published;
+
+      if ($is_published && ((float) $item->sale_price) <= 0) {
+        DB::rollBack();
+        return $this->apiRsp(422, 'No se puede publicar un vehículo sin precio de venta válido');
+      }
+
+      $item->updated_by_id = $user_id;
+      $item->is_published = $is_published;
+      $item->save();
+
+      DB::commit();
+
+      $message = $item->is_published
+        ? 'Vehículo publicado correctamente'
+        : 'Vehículo ocultado correctamente';
+
+      return $this->apiRsp(200, $message, [
+        'item' => [
+          'id' => $item->id,
+          'is_published' => (bool) $item->is_published,
+        ],
+      ]);
+    } catch (Throwable $err) {
+      DB::rollBack();
+      return $this->apiRsp(500, null, $err);
+    }
+  }
+
+  public function sellerIndex(Request $request)
+  {
+    try {
+      $seller_user_id = (int) $request->user()->id;
+
+      return $this->apiRsp(
+        200,
+        'Registros retornados correctamente',
+        ['items' => Vehicle::getItemsSeller($seller_user_id)]
+      );
+    } catch (Throwable $err) {
+      return $this->apiRsp(500, null, $err);
+    }
+  }
+
+  public function sellerShow(Request $request, int $vehicle_id)
+  {
+    try {
+      $seller_user_id = (int) $request->user()->id;
+      $item = Vehicle::getItemSeller($vehicle_id, $seller_user_id);
+
+      if (!$item) {
+        return $this->apiRsp(404, 'Registro no encontrado');
+      }
+
+      return $this->apiRsp(
+        200,
+        'Registro retornado correctamente',
+        ['item' => $item]
+      );
+    } catch (Throwable $err) {
+      return $this->apiRsp(500, null, $err);
+    }
+  }
 }

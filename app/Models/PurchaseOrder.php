@@ -28,7 +28,7 @@ class PurchaseOrder extends Model
       'total_amount' => 'required|numeric',
       'vendor_id' => 'required|numeric',
       'due_date' => 'required|date',
-      'reference' => 'nullable|min:2|max:40',
+      'reference' => 'nullable|min:2|max:100',
       'note' => 'nullable',
     ];
 
