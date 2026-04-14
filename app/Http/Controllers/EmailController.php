@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\GenMailable;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
@@ -144,6 +145,54 @@ class EmailController extends Controller
 
     Mail::to($email)->send(
       new GenMailable($data, $subject, 'VehicleReservationApprovedCustomer')
+    );
+  }
+
+  public static function vehicleSalePaymentStoreCustomer($email, $data): void
+  {
+    if (GenController::isAppDebug()) {
+      $email = env('MAIL_DEBUG');
+    }
+
+    if (GenController::empty($email)) {
+      return;
+    }
+
+    $pdf = Pdf::loadView('pdf.VehicleSalePaymentReceipt', [
+      'data' => $data,
+    ]);
+
+    $pdf_content = $pdf->output();
+
+    $attachments = [
+      [
+        'data' => $pdf_content,
+        'name' => 'recibo_pago_apartado_' . ($data->vehicle?->uiid ?? 'AUTO') . '.pdf',
+        'mime' => 'application/pdf',
+      ]
+    ];
+
+    $subject = 'Pago de apartado recibido | ' . ($data->vehicle?->uiid ?? 'AUTO');
+
+    Mail::to($email)->send(
+      new GenMailable($data, $subject, 'VehicleSalePaymentStoreCustomer', $attachments)
+    );
+  }
+
+  public static function vehicleSalePaymentStoreSeller($email, $data): void
+  {
+    if (GenController::isAppDebug()) {
+      $email = env('MAIL_DEBUG');
+    }
+
+    if (GenController::empty($email)) {
+      return;
+    }
+
+    $subject = 'Pago de apartado registrado | ' . ($data->vehicle?->uiid ?? 'AUTO');
+
+    Mail::to($email)->send(
+      new GenMailable($data, $subject, 'VehicleSalePaymentStoreSeller')
     );
   }
 }

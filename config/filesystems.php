@@ -137,6 +137,20 @@ return [
       'visibility' => 'public',
     ],
 
+    'Customer' => [
+      'driver' => 'local',
+      'root' => storage_path('app/private/Customer'),
+      'url' => env('APP_URL') . '/storage',
+      'visibility' => 'public',
+    ],
+
+    'VehicleSalePayment' => [
+      'driver' => 'local',
+      'root' => storage_path('app/private/VehicleSalePayment'),
+      'url' => env('APP_URL') . '/storage',
+      'visibility' => 'public',
+    ],
+
     'temp' => [
       'driver' => 'local',
       'root' => storage_path('app/private/temp'),

@@ -167,7 +167,8 @@ class VehicleReservationController extends Controller
   public static function saveItem($item, $request)
   {
     $item->customer_name = GenController::filter($request->customer_name, 'U');
-    $item->customer_last_name = GenController::filter($request->customer_last_name, 'U');
+    $item->customer_paternal_surname = GenController::filter($request->customer_paternal_surname, 'U');
+    $item->customer_maternal_surname = GenController::filter($request->customer_maternal_surname, 'U');
     $item->customer_email = GenController::trim($request->customer_email);
     $item->customer_phone = GenController::trim($request->customer_phone);
 
@@ -240,6 +241,13 @@ class VehicleReservationController extends Controller
         return $this->apiRsp(422, 'La solicitud ya fue respondida');
       }
 
+      $vehicle = Vehicle::find($item->vehicle_id);
+
+      if (!$vehicle) {
+        DB::rollBack();
+        return $this->apiRsp(404, 'Auto no encontrado');
+      }
+
       $is_approved = GenController::filter($request->is_approved, 'b');
 
       if (is_null($is_approved)) {
@@ -261,7 +269,26 @@ class VehicleReservationController extends Controller
           return $this->apiRsp(422, 'La fecha de vencimiento es requerida');
         }
 
+        $final_sale_price = GenController::filter($request->final_sale_price, 'd');
+
+        if (is_null($final_sale_price) || $final_sale_price <= 0) {
+          DB::rollBack();
+          return $this->apiRsp(422, 'El precio final de venta es requerido');
+        }
+
+        $sale_commission_amount = GenController::filter($request->sale_commission_amount, 'd');
+
+        if (is_null($sale_commission_amount) || $sale_commission_amount < 0) {
+          DB::rollBack();
+          return $this->apiRsp(422, 'La comisión de venta es requerida');
+        }
+
         $item->expires_at = $expires_at;
+
+        $vehicle->updated_by_id = $user_id;
+        $vehicle->final_sale_price = $final_sale_price;
+        $vehicle->sale_commission_amount = $sale_commission_amount;
+        $vehicle->save();
       } else {
         $item->is_active = 0;
         $item->expires_at = null;
@@ -314,7 +341,7 @@ class VehicleReservationController extends Controller
       return;
     }
 
-    $item->customer_full_name = trim($item->customer_name . ' ' . $item->customer_last_name);
+    $item->customer_full_name = trim($item->customer_name . ' ' . $item->customer_paternal_surname . ' ' . $item->customer_maternal_surname);
 
     EmailController::vehicleReservationApprovedCustomer($item->customer_email, $item);
   }

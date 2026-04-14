@@ -36,6 +36,7 @@ use App\Http\Controllers\VehicleInvestorController;
 use App\Http\Controllers\VehicleInvoiceController;
 use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\VehicleReservationController;
+use App\Http\Controllers\VehicleSaleController;
 use App\Http\Controllers\VehicleTransmissionController;
 use App\Http\Controllers\VehicleVersionController;
 use App\Http\Controllers\VendorController;
@@ -64,6 +65,17 @@ Route::group(['middleware' => 'auth:api'], function () {
  * ===========================================
  */
 Route::group(['middleware' => ['auth:api', 'system']], function () {
+  /**
+   * ===========================================
+   * Vehicle Sales
+   * ===========================================
+   */
+  Route::group(['prefix' => 'vehicle_sales'], function () {
+    Route::get('reservations', [VehicleSaleController::class, 'getReservationItems']);
+    Route::get('reservations/{vehicle_reservation_id}', [VehicleSaleController::class, 'getReservationItem']);
+    Route::post('', [VehicleSaleController::class, 'store']);
+  });
+
   /**
    * ===========================================
    * Vehicle Reservations
@@ -211,6 +223,7 @@ Route::group(['middleware' => ['auth:api', 'system']], function () {
    * Catalogs
    * ===========================================
    */
+  Route::get('payment_methods', [PaymentMethodController::class, 'index']);
   Route::get('vat_types', [VatTypeController::class, 'index']);
   Route::get('origin_types', [OriginTypeController::class, 'index']);
   Route::get('banks', [BankController::class, 'index']);

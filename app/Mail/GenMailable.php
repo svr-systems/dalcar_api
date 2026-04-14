@@ -11,21 +11,42 @@ class GenMailable extends Mailable
   use Queueable, SerializesModels;
 
   public $data;
-  public $subject;
-  public $view;
+  public $subject_text;
+  public $view_name;
+  public $attachments_data;
 
-  public function __construct($data, $subject, $view)
+  public function __construct($data, $subject, $view, array $attachments = [])
   {
     $this->data = $data;
-    $this->subject = $subject;
-    $this->view = $view;
+    $this->subject_text = $subject;
+    $this->view_name = $view;
+    $this->attachments_data = $attachments;
   }
 
   public function build()
   {
-    return $this->subject($this->subject)
-      ->view('email.' . $this->view, [
+    $mail = $this
+      ->subject($this->subject_text)
+      ->view('email.' . $this->view_name, [
         'data' => $this->data,
       ]);
+
+    foreach ($this->attachments_data as $attachment) {
+      if (
+        empty($attachment['data']) ||
+        empty($attachment['name']) ||
+        empty($attachment['mime'])
+      ) {
+        continue;
+      }
+
+      $mail->attachData(
+        $attachment['data'],
+        $attachment['name'],
+        ['mime' => $attachment['mime']]
+      );
+    }
+
+    return $mail;
   }
 }

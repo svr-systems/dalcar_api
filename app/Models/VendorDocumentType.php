@@ -9,4 +9,8 @@ class VendorDocumentType extends Model
 {
   use HasFactory;
   public $timestamps = false;
+
+  protected $casts = [
+    'delivery_days' => 'string',
+  ];
 }

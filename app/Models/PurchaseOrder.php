@@ -69,7 +69,8 @@ class PurchaseOrder extends Model
         'vendor_id',
         'due_date',
         'total_amount',
-        'paid_at'
+        'paid_at',
+        'event'
       ]);
 
     foreach ($items as $key => $item) {

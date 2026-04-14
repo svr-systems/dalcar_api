@@ -31,9 +31,10 @@ class VehicleReservation extends Model
 
     $rules = [
       'vehicle_id' => 'required|numeric',
-      'customer_name' => 'required|min:2|max:100',
-      'customer_last_name' => 'required|min:2|max:100',
-      'customer_email' => 'required|email|max:255',
+      'customer_name' => 'required|min:2|max:191',
+      'customer_paternal_surname' => 'required|min:2|max:25',
+      'customer_maternal_surname' => 'nullable|min:2|max:25',
+      'customer_email' => 'required|email|max:191',
       'customer_phone' => 'nullable|min:10|max:15',
       'is_finance' => 'required|boolean',
       'financier_id' => 'nullable|numeric',
@@ -132,7 +133,8 @@ class VehicleReservation extends Model
         'seller_users.paternal_surname',
         'seller_users.maternal_surname',
         'vehicle_reservations.customer_name',
-        'vehicle_reservations.customer_last_name',
+        'vehicle_reservations.customer_paternal_surname',
+        'vehicle_reservations.customer_maternal_surname',
         'vehicles.id AS vehicle_id',
         'vehicle_versions.model_year AS vehicle_version_model_year',
         'vehicle_colors.name AS vehicle_color_name',
@@ -147,7 +149,7 @@ class VehicleReservation extends Model
       $item->key = $key;
       $item->vehicle_uiid = Vehicle::getUiid($item->vehicle_id);
       $item->seller_user_full_name = GenController::getFullName($item);
-      $item->customer_full_name = trim($item->customer_name . ' ' . $item->customer_last_name);
+      $item->customer_full_name = trim($item->customer_name . ' ' . $item->customer_paternal_surname . ' ' . $item->customer_maternal_surname);
     }
 
     return $items;
@@ -228,6 +230,153 @@ class VehicleReservation extends Model
     $item->suggested_expires_at = is_null($item->is_approved) && $item->created_at
       ? $item->created_at->copy()->addDays((int) $item->reservation_days)->format('Y-m-d')
       : null;
+
+    return $item;
+  }
+
+  public static function getItemsToSale($request)
+  {
+    $items = self::query()
+      ->join('vehicles', 'vehicles.id', '=', 'vehicle_reservations.vehicle_id')
+      ->join('vehicle_versions', 'vehicle_versions.id', '=', 'vehicles.vehicle_version_id')
+      ->join('vehicle_models', 'vehicle_models.id', '=', 'vehicle_versions.vehicle_model_id')
+      ->join('vehicle_brands', 'vehicle_brands.id', '=', 'vehicle_models.vehicle_brand_id')
+      ->join('users AS seller_users', 'seller_users.id', '=', 'vehicle_reservations.seller_user_id')
+      ->leftJoin('payment_methods', 'payment_methods.id', '=', 'vehicle_reservations.payment_method_id')
+      ->where('vehicle_reservations.is_active', 1)
+      ->where('vehicle_reservations.is_approved', 1)
+      ->whereNull('vehicle_reservations.paid_at')
+      ->orderByDesc('vehicle_reservations.id')
+      ->get([
+        'vehicle_reservations.id',
+        'vehicle_reservations.customer_name',
+        'vehicle_reservations.customer_paternal_surname',
+        'vehicle_reservations.customer_maternal_surname',
+        'vehicle_reservations.reservation_amount',
+        'vehicle_reservations.expires_at',
+        'vehicles.id AS vehicle_id',
+        'vehicle_brands.name AS vehicle_brand_name',
+        'vehicle_models.name AS vehicle_model_name',
+        'vehicle_versions.model_year AS vehicle_version_model_year',
+        'seller_users.name',
+        'seller_users.paternal_surname',
+        'seller_users.maternal_surname',
+        'payment_methods.name AS payment_method_name',
+      ]);
+
+    foreach ($items as $key => $item) {
+      $item->key = $key;
+      $item->vehicle_uiid = Vehicle::getUiid($item->vehicle_id);
+
+      $item->customer_full_name = GenController::getFullName((object) [
+        'name' => $item->customer_name,
+        'paternal_surname' => $item->customer_paternal_surname,
+        'maternal_surname' => $item->customer_maternal_surname,
+      ]);
+
+      $item->seller_user_full_name = GenController::getFullName($item);
+    }
+
+    return $items;
+  }
+
+  public static function getItemToSale($id)
+  {
+    $item = self::query()->find($id);
+
+    if (!$item) {
+      return null;
+    }
+
+    if (!boolval($item->is_active)) {
+      return null;
+    }
+
+    if (!boolval($item->is_approved)) {
+      return null;
+    }
+
+    if (!is_null($item->paid_at)) {
+      return null;
+    }
+
+    $item->seller_user = User::query()->find($item->seller_user_id, [
+      'id',
+      'email',
+      'name',
+      'paternal_surname',
+      'maternal_surname',
+    ]);
+
+    if ($item->seller_user) {
+      $item->seller_user->full_name = GenController::getFullName($item->seller_user);
+    }
+
+    $item->paid_by = User::query()->find($item->paid_by_id, ['id', 'email']);
+    $item->response_by = User::query()->find($item->response_by_id, ['id', 'email']);
+
+    $item->vehicle = Vehicle::query()->find($item->vehicle_id, [
+      'id',
+      'vehicle_version_id',
+      'vehicle_color_id',
+      'vehicle_transmission_id',
+      'vin',
+      'engine_number',
+      'repuve',
+      'vehicle_key',
+      'passenger_capacity',
+      'notes',
+      'sale_price',
+      'final_sale_price',
+      'sale_commission_amount',
+    ]);
+
+    if ($item->vehicle) {
+      $item->vehicle->uiid = Vehicle::getUiid($item->vehicle->id);
+
+      $item->vehicle->vehicle_version = VehicleVersion::query()->find(
+        $item->vehicle->vehicle_version_id,
+        ['name', 'vehicle_model_id', 'model_year']
+      );
+
+      if ($item->vehicle->vehicle_version) {
+        $item->vehicle->vehicle_version->vehicle_model = VehicleModel::query()->find(
+          $item->vehicle->vehicle_version->vehicle_model_id,
+          ['name', 'vehicle_brand_id']
+        );
+
+        if ($item->vehicle->vehicle_version->vehicle_model) {
+          $item->vehicle->vehicle_version->vehicle_model->vehicle_brand = VehicleBrand::query()->find(
+            $item->vehicle->vehicle_version->vehicle_model->vehicle_brand_id,
+            ['name']
+          );
+        }
+      }
+
+      $item->vehicle->vehicle_color = VehicleColor::query()->find(
+        $item->vehicle->vehicle_color_id,
+        ['name']
+      );
+
+      $item->vehicle->vehicle_transmission = VehicleTransmission::query()->find(
+        $item->vehicle->vehicle_transmission_id,
+        ['name']
+      );
+    }
+
+    $item->payment_method = PaymentMethod::query()->find($item->payment_method_id, ['id', 'name']);
+    $item->financier = Financier::query()->find($item->financier_id, ['id', 'name']);
+
+    $item->customer_ine_b64 = DocMgrController::getB64($item->customer_ine_path, 'VehicleReservation');
+    $item->customer_ine_doc = null;
+
+    $item->preapproval_b64 = DocMgrController::getB64($item->preapproval_path, 'VehicleReservation');
+
+    $item->customer_full_name = GenController::getFullName((object) [
+      'name' => $item->customer_name,
+      'paternal_surname' => $item->customer_paternal_surname,
+      'maternal_surname' => $item->customer_maternal_surname,
+    ]);
 
     return $item;
   }

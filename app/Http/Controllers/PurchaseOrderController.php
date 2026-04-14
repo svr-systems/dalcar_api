@@ -169,6 +169,7 @@ class PurchaseOrderController extends Controller
       $data->other_dlt,
       'PurchaseOrder'
     );
+    $item->event = GenController::filter($data->event, 'U');
     $item->note = GenController::filter($data->note, 'U');
     $item->save();
 
