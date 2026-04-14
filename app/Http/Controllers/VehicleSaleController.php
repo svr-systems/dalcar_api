@@ -8,6 +8,7 @@ use App\Models\SalePaymentType;
 use App\Models\VehicleReservation;
 use App\Models\VehicleSale;
 use App\Models\VehicleSalePayment;
+use Barryvdh\DomPDF\Facade\Pdf;
 use DB;
 use Illuminate\Http\Request;
 use Throwable;
@@ -184,7 +185,7 @@ class VehicleSaleController extends Controller
       $vehicle_reservation->payment_method_id = (int) $payment_method->id;
       $vehicle_reservation->save();
 
-      // DB::commit();
+      DB::commit();
 
       $item = VehicleSale::getItem($vehicle_sale->id);
 
@@ -246,5 +247,60 @@ class VehicleSaleController extends Controller
     }
 
     EmailController::vehicleSalePaymentStoreSeller($item->seller_user->email, $item);
+  }
+
+  public function show(Request $request, int $id)
+  {
+    try {
+      $item = VehicleSale::getItem($id);
+
+      if (!$item) {
+        return $this->apiRsp(404, 'Registro no encontrado');
+      }
+
+      return $this->apiRsp(
+        200,
+        'Registro retornado correctamente',
+        ['item' => $item]
+      );
+    } catch (Throwable $err) {
+      return $this->apiRsp(500, null, $err);
+    }
+  }
+
+  public function getReceipt(Request $request, int $id)
+  {
+    try {
+      $item = VehicleSale::getItem($id);
+
+      if (!$item) {
+        return $this->apiRsp(404, 'Registro no encontrado');
+      }
+
+      if (!$item->reservation_payment) {
+        return $this->apiRsp(422, 'El recibo de pago no está disponible');
+      }
+
+      $pdf = Pdf::loadView('pdf.VehicleSalePaymentReceipt', [
+        'data' => $item,
+      ]);
+
+      $pdf_content = $pdf->output();
+
+      return $this->apiRsp(
+        200,
+        'Recibo retornado correctamente',
+        [
+          'item' => [
+            'name' => 'recibo_pago_apartado_' . ($item->reservation_payment->uiid ?? $item->id),
+            'ext' => 'pdf',
+            'mime' => 'application/pdf',
+            'cnt' => base64_encode($pdf_content),
+          ],
+        ]
+      );
+    } catch (Throwable $err) {
+      return $this->apiRsp(500, null, $err);
+    }
   }
 }

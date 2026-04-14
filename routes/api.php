@@ -73,6 +73,8 @@ Route::group(['middleware' => ['auth:api', 'system']], function () {
   Route::group(['prefix' => 'vehicle_sales'], function () {
     Route::get('reservations', [VehicleSaleController::class, 'getReservationItems']);
     Route::get('reservations/{vehicle_reservation_id}', [VehicleSaleController::class, 'getReservationItem']);
+    Route::get('{id}', [VehicleSaleController::class, 'show']);
+    Route::get('{id}/receipt', [VehicleSaleController::class, 'getReceipt']);
     Route::post('', [VehicleSaleController::class, 'store']);
   });
 

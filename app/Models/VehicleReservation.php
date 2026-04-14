@@ -236,7 +236,10 @@ class VehicleReservation extends Model
 
   public static function getItemsToSale($request)
   {
+    $filter = in_array((int) $request->filter, [1, 2]) ? (int) $request->filter : 1;
+
     $items = self::query()
+      ->leftJoin('vehicle_sales', 'vehicle_sales.vehicle_reservation_id', '=', 'vehicle_reservations.id')
       ->join('vehicles', 'vehicles.id', '=', 'vehicle_reservations.vehicle_id')
       ->join('vehicle_versions', 'vehicle_versions.id', '=', 'vehicles.vehicle_version_id')
       ->join('vehicle_models', 'vehicle_models.id', '=', 'vehicle_versions.vehicle_model_id')
@@ -244,8 +247,17 @@ class VehicleReservation extends Model
       ->join('users AS seller_users', 'seller_users.id', '=', 'vehicle_reservations.seller_user_id')
       ->leftJoin('payment_methods', 'payment_methods.id', '=', 'vehicle_reservations.payment_method_id')
       ->where('vehicle_reservations.is_active', 1)
-      ->where('vehicle_reservations.is_approved', 1)
-      ->whereNull('vehicle_reservations.paid_at')
+      ->where('vehicle_reservations.is_approved', 1);
+
+    if ($filter === 1) {
+      $items->whereNull('vehicle_reservations.paid_at');
+    }
+
+    if ($filter === 2) {
+      $items->whereNotNull('vehicle_reservations.paid_at');
+    }
+
+    $items = $items
       ->orderByDesc('vehicle_reservations.id')
       ->get([
         'vehicle_reservations.id',
@@ -254,7 +266,9 @@ class VehicleReservation extends Model
         'vehicle_reservations.customer_maternal_surname',
         'vehicle_reservations.reservation_amount',
         'vehicle_reservations.expires_at',
+        'vehicle_reservations.paid_at',
         'vehicles.id AS vehicle_id',
+        'vehicle_sales.id AS vehicle_sale_id',
         'vehicle_brands.name AS vehicle_brand_name',
         'vehicle_models.name AS vehicle_model_name',
         'vehicle_versions.model_year AS vehicle_version_model_year',
